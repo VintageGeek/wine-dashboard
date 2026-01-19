@@ -107,6 +107,22 @@
             color: var(--text-secondary);
         }
 
+        .settings-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
+        .settings-link:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-primary);
+        }
+
         .pull-btn {
             position: relative;
             width: 44px;
@@ -1564,15 +1580,12 @@
             display: block;
         }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const firebaseConfig = {
-            databaseURL: "https://wine-explorer-puller-default-rtdb.firebaseio.com"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const SUPABASE_URL = 'https://jxidqettmqneswsuevoc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4aWRxZXR0bXFuZXN3c3Vldm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MDE3MjYsImV4cCI6MjA4NDM3NzcyNn0.ZuJszNJv1n7xT7Gj43Pwk8uJONXv_XntyOGNyDO1ccI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     </script>
 </head>
 <body>
@@ -1591,6 +1604,12 @@
                     <span class="value" id="statValue">-</span>
                 </div>
             </div>
+            <a href="settings.html" class="settings-link" title="Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </a>
         </div>
     </header>
 
@@ -1882,11 +1901,16 @@
         // Load data
         async function loadWineData() {
             try {
-                const response = await fetch('wine_collection.json');
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                wineData = await response.json();
-                if (!wineData || !wineData.wines) throw new Error('Invalid data structure');
-                filteredWines = [...wineData.wines];
+                const { data, error } = await supabaseClient
+                    .from('v_wines_full')
+                    .select('*')
+                    .gt('quantity', 0);
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error('No wines found');
+
+                wineData = { wines: data };
+                filteredWines = [...data];
                 initializeApp();
             } catch (error) {
                 console.error('Load error:', error);
@@ -1914,13 +1938,32 @@
             }
         }
 
-        function listenToDemoMode() {
-            database.ref('settings/demoMode').on('value', (snapshot) => {
-                demoMode = snapshot.val() || false;
-                updateStats();
-                renderWines();
-                renderPullSheet();
-            });
+        async function listenToDemoMode() {
+            // Load initial value
+            const { data } = await supabaseClient
+                .from('app_settings')
+                .select('value')
+                .eq('key', 'demoMode')
+                .single();
+
+            demoMode = data?.value === true || data?.value === 'true';
+            updateStats();
+            renderWines();
+            renderPullSheet();
+
+            // Subscribe to changes
+            supabaseClient
+                .channel('demo-mode-changes-mobile')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'app_settings', filter: 'key=eq.demoMode' },
+                    (payload) => {
+                        demoMode = payload.new?.value === true || payload.new?.value === 'true';
+                        updateStats();
+                        renderWines();
+                        renderPullSheet();
+                    }
+                )
+                .subscribe();
         }
 
         function formatValue(amount) {
@@ -2660,24 +2703,36 @@
             renderWines();
         }
 
-        function saveMarkedWines() {
-            const data = {
-                lastUpdated: new Date().toISOString(),
-                pullList: Object.fromEntries(markedForRemoval)
-            };
-            database.ref('pullList').set(data)
-                .catch(err => console.log('Could not save to Firebase:', err));
+        async function saveMarkedWines() {
+            try {
+                // Delete all existing pull list items
+                await supabaseClient.from('pull_list_items').delete().neq('wine_id', '');
+
+                // Insert current items
+                if (markedForRemoval.size > 0) {
+                    const items = Array.from(markedForRemoval.entries()).map(([wineId, qty]) => ({
+                        wine_id: wineId,
+                        quantity: qty
+                    }));
+                    await supabaseClient.from('pull_list_items').insert(items);
+                }
+            } catch (err) {
+                console.log('Could not save pull list:', err);
+            }
         }
 
         async function loadMarkedWines() {
             try {
-                const snapshot = await database.ref('pullList').once('value');
-                const data = snapshot.val();
-                if (data && data.pullList) {
-                    markedForRemoval = new Map(Object.entries(data.pullList));
+                const { data, error } = await supabaseClient
+                    .from('pull_list_items')
+                    .select('wine_id, quantity');
+
+                if (error) throw error;
+                if (data) {
+                    markedForRemoval = new Map(data.map(item => [item.wine_id, item.quantity]));
                 }
             } catch (err) {
-                console.log('Could not load pull list from Firebase:', err);
+                console.log('Could not load pull list:', err);
             }
         }
 
@@ -3225,8 +3280,23 @@
             };
         }
 
-        // Initialize
-        loadWineData();
+        // Check auth and initialize
+        async function checkAuthAndInit() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html?redirect=mobile.html';
+                return;
+            }
+            // Check MFA level
+            const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (aalData.currentLevel !== 'aal2') {
+                window.location.href = 'login.html?redirect=mobile.html';
+                return;
+            }
+            loadWineData();
+        }
+
+        checkAuthAndInit();
         setupModalSwipe();
         setupSheetSwipe('filterSheet', closeFilterSheet);
         setupSheetSwipe('pullSheet', closePullSheet);

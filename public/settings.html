@@ -42,75 +42,6 @@
             color: #1d1d1f;
         }
 
-        h2 {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #1d1d1f;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #86868b;
-            margin-bottom: 8px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d1d6;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #0071e3;
-            box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #0071e3;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #0077ED;
-        }
-
-        button:disabled {
-            background: #86868b;
-            cursor: not-allowed;
-        }
-
-        .error {
-            color: #ff3b30;
-            font-size: 14px;
-            margin-top: 12px;
-            display: none;
-        }
-
-        .error.show {
-            display: block;
-        }
-
         .toggle-row {
             display: flex;
             justify-content: space-between;
@@ -201,6 +132,28 @@
             color: #c22d25;
         }
 
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0077ED;
+        }
+
+        button:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+        }
+
         .logout-btn {
             margin-top: 24px;
             background: #f5f5f7;
@@ -209,6 +162,18 @@
 
         .logout-btn:hover {
             background: #e5e5e7;
+        }
+
+        .back-home {
+            display: block;
+            color: #0071e3;
+            font-size: 14px;
+            text-decoration: none;
+            margin-bottom: 16px;
+        }
+
+        .back-home:hover {
+            text-decoration: underline;
         }
 
         .section-divider {
@@ -252,111 +217,92 @@
             font-weight: 500;
         }
 
-        .sync-badge.success { background: #d4edda; color: #155724; }
-        .sync-badge.partial { background: #fff3cd; color: #856404; }
-        .sync-badge.failed { background: #f8d7da; color: #721c24; }
+        .sync-badge.success {
+            background: rgba(52,199,89,0.15);
+            color: #1a7f37;
+        }
+
+        .sync-badge.partial {
+            background: rgba(255,149,0,0.15);
+            color: #b25000;
+        }
+
+        .sync-badge.failed {
+            background: rgba(255,59,48,0.15);
+            color: #c22d25;
+        }
 
         .sync-counts {
             display: flex;
             gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .sync-count {
             font-size: 13px;
             color: #86868b;
         }
 
+        .sync-count strong {
+            color: #1d1d1f;
+        }
+
         .validation-list {
-            margin-top: 12px;
+            border-top: 1px solid #e5e5e7;
+            padding-top: 12px;
         }
 
         .validation-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 0;
             font-size: 13px;
+            padding: 4px 0;
         }
 
         .validation-icon {
             width: 16px;
             height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
         }
 
-        .validation-icon.pass { background: #d4edda; color: #155724; }
-        .validation-icon.warning { background: #fff3cd; color: #856404; }
-        .validation-icon.fail { background: #f8d7da; color: #721c24; }
-
-        .sync-btn {
-            margin-top: 12px;
-            background: #34c759;
+        .validation-icon.pass {
+            color: #34c759;
         }
 
-        .sync-btn:hover {
-            background: #2db54d;
+        .validation-icon.warning {
+            color: #ff9500;
         }
 
-        .sync-btn:disabled {
-            background: #86868b;
-            cursor: not-allowed;
+        .validation-icon.error {
+            color: #ff3b30;
         }
 
         .no-sync {
-            color: #86868b;
             font-size: 14px;
+            color: #86868b;
             text-align: center;
             padding: 20px;
         }
 
-        /* MFA styles */
-        .qr-container {
-            text-align: center;
-            margin: 20px 0;
+        .sync-btn {
+            background: #34c759;
+            margin-bottom: 0;
         }
 
-        .qr-container svg {
-            max-width: 200px;
-            height: auto;
-        }
-
-        .mfa-instructions {
-            font-size: 14px;
-            color: #86868b;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .totp-input {
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 8px;
-            font-family: monospace;
-        }
-
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            color: #0071e3;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
+        .sync-btn:hover {
+            background: #2db350;
         }
 
         .mfa-badge {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
             font-size: 11px;
-            font-weight: 500;
-            background: #d4edda;
+            font-weight: 600;
+            background: rgba(52,199,89,0.15);
             color: #155724;
+            padding: 3px 8px;
+            border-radius: 10px;
             margin-left: 8px;
+            vertical-align: middle;
         }
 
         .user-info {
@@ -365,69 +311,12 @@
             margin-bottom: 20px;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Login Form -->
-    <div class="container show" id="loginContainer">
-        <h1>Settings Login</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email" autocomplete="email" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" autocomplete="current-password" required>
-            </div>
-            <button type="submit" id="loginBtn">Login</button>
-            <div class="error" id="loginError"></div>
-        </form>
-    </div>
-
-    <!-- MFA Enrollment -->
-    <div class="container" id="mfaEnrollContainer">
-        <h1>Set Up Two-Factor Auth</h1>
-        <p class="mfa-instructions">
-            Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below.
-        </p>
-        <div class="qr-container" id="qrCode"></div>
-        <div class="manual-entry" id="manualEntry" style="display:none;">
-            <p style="font-size:13px;color:#86868b;margin-bottom:8px;">Can't scan? Enter this code manually:</p>
-            <code id="secretCode" style="display:block;background:#f5f5f7;padding:12px;border-radius:8px;font-size:14px;word-break:break-all;text-align:center;user-select:all;"></code>
-        </div>
-        <form id="enrollForm">
-            <div class="form-group">
-                <label>Verification Code</label>
-                <input type="text" id="enrollCode" class="totp-input" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required>
-            </div>
-            <button type="submit" id="enrollBtn">Verify & Enable MFA</button>
-            <div class="error" id="enrollError"></div>
-        </form>
-        <span class="back-link" id="showManualEntry">Can't scan the code?</span>
-    </div>
-
-    <!-- MFA Verification -->
-    <div class="container" id="mfaVerifyContainer">
-        <h1>Two-Factor Authentication</h1>
-        <p class="mfa-instructions">
-            Enter the 6-digit code from your authenticator app.
-        </p>
-        <form id="verifyForm">
-            <div class="form-group">
-                <label>Verification Code</label>
-                <input type="text" id="verifyCode" class="totp-input" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required>
-            </div>
-            <button type="submit" id="verifyBtn">Verify</button>
-            <div class="error" id="verifyError"></div>
-        </form>
-        <span class="back-link" id="backToLogin">Back to login</span>
-    </div>
-
     <!-- Settings Panel -->
     <div class="container" id="settingsContainer">
+        <a href="index.html" class="back-home" id="backLink">&larr; Back to Dashboard</a>
         <h1>Dashboard Settings <span class="mfa-badge">MFA Enabled</span></h1>
         <div class="user-info" id="userInfo"></div>
 
@@ -458,276 +347,26 @@
     </div>
 
     <script>
-        // Firebase (for demo mode - will migrate to Supabase in Phase 4)
-        const firebaseConfig = {
-            databaseURL: "https://wine-explorer-puller-default-rtdb.firebaseio.com"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
         // Supabase
         const SUPABASE_URL = 'https://jxidqettmqneswsuevoc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4aWRxZXR0bXFuZXN3c3Vldm9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MDE3MjYsImV4cCI6MjA4NDM3NzcyNn0.ZuJszNJv1n7xT7Gj43Pwk8uJONXv_XntyOGNyDO1ccI';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // State
-        let currentFactorId = null;
-        let currentChallengeId = null;
-
-        // Elements
-        const loginContainer = document.getElementById('loginContainer');
-        const mfaEnrollContainer = document.getElementById('mfaEnrollContainer');
-        const mfaVerifyContainer = document.getElementById('mfaVerifyContainer');
-        const settingsContainer = document.getElementById('settingsContainer');
-
-        // Helper to show one container
-        function showContainer(container) {
-            [loginContainer, mfaEnrollContainer, mfaVerifyContainer, settingsContainer].forEach(c => {
-                c.classList.remove('show');
-            });
-            container.classList.add('show');
-        }
-
-        // Check existing session on load
+        // Check auth on load
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                await handlePostLogin();
+            if (!session) {
+                window.location.href = 'login.html?redirect=settings.html';
+                return;
             }
+            // Check MFA level
+            const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (aalData.currentLevel !== 'aal2') {
+                window.location.href = 'login.html?redirect=settings.html';
+                return;
+            }
+            showSettings();
         }
-
-        // Login form handler
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const loginError = document.getElementById('loginError');
-
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Logging in...';
-            loginError.classList.remove('show');
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
-                if (error) throw error;
-
-                await handlePostLogin();
-            } catch (err) {
-                loginError.textContent = err.message || 'Login failed';
-                loginError.classList.add('show');
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Login';
-            }
-        });
-
-        // Handle post-login MFA flow
-        async function handlePostLogin() {
-            try {
-                const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
-                console.log('AAL data:', aalData);
-
-                if (aalData.currentLevel === 'aal2') {
-                    // Already fully authenticated with MFA
-                    showSettings();
-                    return;
-                }
-
-                // Check if MFA is enrolled
-                const { data: factors } = await supabaseClient.auth.mfa.listFactors();
-                console.log('MFA factors:', factors);
-
-                const totpFactors = factors?.totp || [];
-                const verifiedFactors = totpFactors.filter(f => f.status === 'verified');
-                const unverifiedFactors = totpFactors.filter(f => f.status === 'unverified');
-
-                if (verifiedFactors.length > 0) {
-                    // Has verified MFA - go to challenge
-                    currentFactorId = verifiedFactors[0].id;
-                    await startMfaChallenge();
-                } else if (unverifiedFactors.length > 0) {
-                    // Has unverified factor - unenroll ALL of them and start fresh
-                    for (const factor of unverifiedFactors) {
-                        console.log('Unenrolling unverified factor:', factor.id);
-                        try {
-                            await supabaseClient.auth.mfa.unenroll({ factorId: factor.id });
-                        } catch (e) {
-                            console.error('Failed to unenroll factor:', e);
-                        }
-                    }
-                    await startMfaEnrollment();
-                } else {
-                    // No MFA enrolled - start enrollment
-                    await startMfaEnrollment();
-                }
-            } catch (err) {
-                console.error('Post-login error:', err);
-                showContainer(loginContainer);
-            }
-        }
-
-        // Start MFA enrollment
-        async function startMfaEnrollment(retryCount = 0) {
-            try {
-                const { data, error } = await supabaseClient.auth.mfa.enroll({
-                    factorType: 'totp'
-                });
-
-                if (error) {
-                    // If factor already exists, try to clean up and retry once
-                    if (error.message.includes('already exists') && retryCount === 0) {
-                        console.log('Factor exists, attempting cleanup...');
-                        const { data: factors } = await supabaseClient.auth.mfa.listFactors();
-                        for (const factor of (factors?.totp || [])) {
-                            try {
-                                console.log('Unenrolling factor:', factor.id, factor.status);
-                                await supabaseClient.auth.mfa.unenroll({ factorId: factor.id });
-                            } catch (e) {
-                                console.error('Unenroll failed:', e);
-                            }
-                        }
-                        // Retry enrollment
-                        return await startMfaEnrollment(1);
-                    }
-                    throw error;
-                }
-
-                console.log('MFA enroll response:', data);
-
-                currentFactorId = data.id;
-
-                // Display QR code (Supabase returns data:image/svg+xml URL)
-                const qrContainer = document.getElementById('qrCode');
-                qrContainer.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = data.totp.qr_code;
-                img.alt = 'QR Code';
-                img.style.width = '200px';
-                img.style.height = '200px';
-                qrContainer.appendChild(img);
-
-                // Store secret for manual entry fallback
-                document.getElementById('secretCode').textContent = data.totp.secret;
-                document.getElementById('manualEntry').style.display = 'none';
-
-                showContainer(mfaEnrollContainer);
-                document.getElementById('enrollCode').focus();
-            } catch (err) {
-                console.error('MFA enrollment error:', err);
-                document.getElementById('loginError').textContent = 'Failed to set up MFA: ' + err.message;
-                document.getElementById('loginError').classList.add('show');
-                showContainer(loginContainer);
-            }
-        }
-
-        // Show manual entry option
-        document.getElementById('showManualEntry').addEventListener('click', () => {
-            document.getElementById('manualEntry').style.display = 'block';
-        });
-
-        // Enrollment form handler
-        document.getElementById('enrollForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('enrollCode').value;
-            const enrollBtn = document.getElementById('enrollBtn');
-            const enrollError = document.getElementById('enrollError');
-
-            enrollBtn.disabled = true;
-            enrollBtn.textContent = 'Verifying...';
-            enrollError.classList.remove('show');
-
-            try {
-                // Challenge then verify to complete enrollment
-                const { data: challengeData, error: challengeError } = await supabaseClient.auth.mfa.challenge({
-                    factorId: currentFactorId
-                });
-
-                if (challengeError) throw challengeError;
-
-                const { data: verifyData, error: verifyError } = await supabaseClient.auth.mfa.verify({
-                    factorId: currentFactorId,
-                    challengeId: challengeData.id,
-                    code
-                });
-
-                if (verifyError) throw verifyError;
-
-                // Successfully enrolled and verified
-                showSettings();
-            } catch (err) {
-                enrollError.textContent = err.message || 'Invalid code';
-                enrollError.classList.add('show');
-                document.getElementById('enrollCode').value = '';
-                document.getElementById('enrollCode').focus();
-            } finally {
-                enrollBtn.disabled = false;
-                enrollBtn.textContent = 'Verify & Enable MFA';
-            }
-        });
-
-        // Start MFA challenge for existing enrollment
-        async function startMfaChallenge() {
-            try {
-                const { data, error } = await supabaseClient.auth.mfa.challenge({
-                    factorId: currentFactorId
-                });
-
-                if (error) throw error;
-
-                currentChallengeId = data.id;
-                showContainer(mfaVerifyContainer);
-                document.getElementById('verifyCode').focus();
-            } catch (err) {
-                console.error('MFA challenge error:', err);
-            }
-        }
-
-        // Verify form handler
-        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('verifyCode').value;
-            const verifyBtn = document.getElementById('verifyBtn');
-            const verifyError = document.getElementById('verifyError');
-
-            verifyBtn.disabled = true;
-            verifyBtn.textContent = 'Verifying...';
-            verifyError.classList.remove('show');
-
-            try {
-                const { data, error } = await supabaseClient.auth.mfa.verify({
-                    factorId: currentFactorId,
-                    challengeId: currentChallengeId,
-                    code
-                });
-
-                if (error) throw error;
-
-                showSettings();
-            } catch (err) {
-                verifyError.textContent = err.message || 'Invalid code';
-                verifyError.classList.add('show');
-                document.getElementById('verifyCode').value = '';
-                document.getElementById('verifyCode').focus();
-                // Get new challenge for retry
-                await startMfaChallenge();
-            } finally {
-                verifyBtn.disabled = false;
-                verifyBtn.textContent = 'Verify';
-            }
-        });
-
-        // Back to login link
-        document.getElementById('backToLogin').addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            showContainer(loginContainer);
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-        });
 
         // Show settings panel
         async function showSettings() {
@@ -735,34 +374,41 @@
             if (user) {
                 document.getElementById('userInfo').textContent = `Logged in as: ${user.email}`;
             }
-            showContainer(settingsContainer);
+            // Update back link based on referrer
+            const referrer = document.referrer;
+            if (referrer.includes('mobile.html')) {
+                document.getElementById('backLink').href = 'mobile.html';
+            }
+            document.getElementById('settingsContainer').classList.add('show');
             loadSettings();
             loadSyncStatus();
         }
 
-        // Logout handler
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            showContainer(loginContainer);
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-        });
-
-        // Load settings from Firebase
+        // Load demo mode setting from Supabase
         async function loadSettings() {
             try {
-                const snapshot = await database.ref('settings').once('value');
-                const settings = snapshot.val() || {};
-                document.getElementById('demoModeToggle').checked = settings.demoMode || false;
+                const { data, error } = await supabaseClient
+                    .from('app_settings')
+                    .select('value')
+                    .eq('key', 'demoMode')
+                    .single();
+
+                if (!error && data) {
+                    document.getElementById('demoModeToggle').checked = data.value === true || data.value === 'true';
+                }
             } catch (err) {
                 showStatus('Failed to load settings', 'error');
             }
         }
 
-        // Save demo mode
+        // Save demo mode to Supabase
         document.getElementById('demoModeToggle').addEventListener('change', async () => {
             try {
-                await database.ref('settings/demoMode').set(document.getElementById('demoModeToggle').checked);
+                const { error } = await supabaseClient
+                    .from('app_settings')
+                    .upsert({ key: 'demoMode', value: document.getElementById('demoModeToggle').checked });
+
+                if (error) throw error;
                 showStatus('Settings saved successfully', 'success');
             } catch (err) {
                 showStatus('Failed to save settings', 'error');
@@ -787,62 +433,52 @@
                     .from('sync_results')
                     .select('*')
                     .order('synced_at', { ascending: false })
-                    .limit(1);
+                    .limit(1)
+                    .single();
 
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    syncStatusEl.innerHTML = '<div class="no-sync">No sync history found</div>';
+                if (error || !data) {
+                    syncStatusEl.innerHTML = '<div class="no-sync">No sync history available</div>';
                     return;
                 }
 
-                renderSyncStatus(data[0]);
+                const syncDate = new Date(data.synced_at);
+                const formattedDate = syncDate.toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric',
+                    hour: 'numeric', minute: '2-digit'
+                });
+
+                let validationHtml = '';
+                if (data.validation && data.validation.checks) {
+                    validationHtml = '<div class="validation-list">' +
+                        data.validation.checks.map(check => {
+                            const icon = check.status === 'pass' ? '✓' : check.status === 'warning' ? '⚠' : '✗';
+                            const iconClass = check.status;
+                            return `<div class="validation-item">
+                                <span class="validation-icon ${iconClass}">${icon}</span>
+                                <span>${formatCheckName(check.name)}: ${check.count}</span>
+                            </div>`;
+                        }).join('') +
+                        '</div>';
+                }
+
+                syncStatusEl.innerHTML = `
+                    <div class="sync-status-card">
+                        <div class="sync-header">
+                            <span class="sync-time">${formattedDate}</span>
+                            <span class="sync-badge ${data.status}">${data.status}</span>
+                        </div>
+                        <div class="sync-counts">
+                            <span class="sync-count"><strong>${data.wines_synced || 0}</strong> wines</span>
+                            <span class="sync-count"><strong>${data.bottles_synced || 0}</strong> bottles</span>
+                        </div>
+                        ${validationHtml}
+                    </div>
+                `;
             } catch (err) {
-                console.error('Failed to load sync status:', err);
                 syncStatusEl.innerHTML = '<div class="no-sync">Failed to load sync status</div>';
             }
         }
 
-        // Render sync status card
-        function renderSyncStatus(sync) {
-            const syncStatusEl = document.getElementById('syncStatus');
-            const syncDate = new Date(sync.synced_at);
-            const timeStr = syncDate.toLocaleDateString() + ' ' + syncDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-            const validation = sync.validation?.checks || [];
-
-            let validationHtml = '';
-            validation.forEach(check => {
-                const icon = check.status === 'pass' ? '✓' : check.status === 'warning' ? '!' : '✗';
-                const iconClass = check.status;
-                const label = formatCheckName(check.name);
-                const countStr = check.count !== undefined ? ` (${check.count})` : '';
-
-                validationHtml += `
-                    <div class="validation-item">
-                        <span class="validation-icon ${iconClass}">${icon}</span>
-                        <span>${label}${countStr}</span>
-                    </div>
-                `;
-            });
-
-            syncStatusEl.innerHTML = `
-                <div class="sync-status-card">
-                    <div class="sync-header">
-                        <span class="sync-time">${timeStr}</span>
-                        <span class="sync-badge ${sync.status}">${sync.status}</span>
-                    </div>
-                    <div class="sync-counts">
-                        <span>Wines: ${sync.wines_synced || 0}</span>
-                        <span>Bottles: ${sync.bottles_synced || 0}</span>
-                    </div>
-                    ${sync.error_message ? `<div style="color:#c22d25;font-size:13px;margin-top:8px;">${sync.error_message}</div>` : ''}
-                    ${validationHtml ? `<div class="validation-list">${validationHtml}</div>` : ''}
-                </div>
-            `;
-        }
-
-        // Format check name for display
         function formatCheckName(name) {
             const names = {
                 'wine_count': 'Wine count',
@@ -866,7 +502,6 @@
             syncBtn.textContent = 'Syncing...';
 
             try {
-                // Get current session for auth token
                 const { data: { session } } = await supabaseClient.auth.getSession();
 
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/sync-cellartracker`, {
@@ -891,6 +526,12 @@
                 syncBtn.disabled = false;
                 syncBtn.textContent = 'Sync from CellarTracker';
             }
+        });
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login.html';
         });
 
         // Init
