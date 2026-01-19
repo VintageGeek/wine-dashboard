@@ -2095,8 +2095,8 @@
         }
 
         function getDrinkStatus(wine) {
-            const minYear = parseInt(wine.drink_date_min) || parseInt(wine.drink_from_year) || 0;
-            const maxYear = parseInt(wine.drink_date_max) || parseInt(wine.drink_by_year) || 9999;
+            const minYear = parseInt(wine.drink_date_min) || 0;
+            const maxYear = parseInt(wine.drink_date_max) || 9999;
             if (currentYear < minYear) return 'Hold';
             if (currentYear > maxYear) return 'Past Peak';
             return 'Ready Now';
@@ -2807,11 +2807,11 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <div class="label">From</div>
-                            <div class="value">${wine.drink_date_min || wine.drink_from_year || '-'}</div>
+                            <div class="value">${wine.drink_date_min || '-'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">To</div>
-                            <div class="value">${wine.drink_date_max || wine.drink_by_year || '-'}</div>
+                            <div class="value">${wine.drink_date_max || '-'}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">Status</div>

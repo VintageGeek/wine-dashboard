@@ -2183,8 +2183,8 @@
         }
 
         function getDrinkStatus(wine) {
-            const minYear = parseInt(wine.drink_date_min) || parseInt(wine.drink_from_year) || 0;
-            const maxYear = parseInt(wine.drink_date_max) || parseInt(wine.drink_by_year) || 9999;
+            const minYear = parseInt(wine.drink_date_min) || 0;
+            const maxYear = parseInt(wine.drink_date_max) || 9999;
             if (currentYear < minYear) return 'Hold';
             if (currentYear > maxYear) return 'Past Peak';
             return 'Ready Now';
@@ -2196,8 +2196,8 @@
         }
 
         function formatDrinkWindow(wine) {
-            const fromYear = parseInt(wine.drink_date_min) || parseInt(wine.drink_from_year) || null;
-            const toYear = parseInt(wine.drink_date_max) || parseInt(wine.drink_by_year) || null;
+            const fromYear = parseInt(wine.drink_date_min) || null;
+            const toYear = parseInt(wine.drink_date_max) || null;
             if (fromYear && toYear) return `${fromYear}–${toYear}`;
             if (fromYear) return `${fromYear}+`;
             if (toYear) return `Until ${toYear}`;
@@ -3369,10 +3369,8 @@
                 const sortOption = e.target.closest('.sort-option');
                 if (sortOption) {
                     sortConfig.key = sortOption.dataset.sort;
-                    // Direction comes from the toggle, not the option
                     updateSortOptions();
                     renderWines();
-                    // Don't auto-close - user will swipe down when done
                     return;
                 }
 
