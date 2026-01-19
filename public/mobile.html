@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+    <title>Wine Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #a1a1a6;
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --wine-red: #9d174d;
+            --wine-gold: #b45309;
+            --wine-rose: #db2777;
+            --border: rgba(0,0,0,0.08);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --header-height: 56px;
+            --nav-height: 56px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior: none;
+            padding-top: calc(var(--safe-top) + var(--header-height));
+            padding-bottom: calc(var(--safe-bottom) + var(--nav-height));
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding-top: var(--safe-top);
+        }
+
+        .header-content {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-stat {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .header-stat .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--wine-red);
+        }
+
+        .header-stat .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .pull-btn {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .pull-btn .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            min-width: 18px;
+            height: 18px;
+            background: #34c759;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 9px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .pull-btn.has-items .badge {
+            display: flex;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 16px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            appearance: none;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,113,227,0.2);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: var(--text-tertiary);
+        }
+
+        /* Chart Carousel */
+        .charts-section {
+            margin-bottom: 20px;
+        }
+
+        /* Mini Charts Bar */
+        .charts-mini-bar {
+            position: fixed;
+            top: calc(var(--safe-top) + var(--header-height));
+            left: 0;
+            right: 0;
+            z-index: 99;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .charts-mini-bar.visible {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mini-chart-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .mini-chart-icon:active {
+            transform: scale(0.95);
+            background: rgba(0,113,227,0.1);
+        }
+
+        .mini-chart-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .mini-chart-icon.has-filter {
+            background: rgba(0,113,227,0.12);
+        }
+
+        .mini-chart-icon.has-filter svg {
+            stroke: var(--accent);
+        }
+
+        .mini-bar-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .mini-bar-chevron {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-tertiary);
+            margin-left: auto;
+            transition: transform 0.2s;
+        }
+
+        .charts-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px 0;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .charts-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chart-card {
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-card h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-breadcrumb {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-btn {
+            font-size: 11px;
+            color: var(--accent);
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .chart-btn.visible {
+            display: block;
+        }
+
+        .chart-btn:active {
+            background: rgba(0,113,227,0.1);
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            margin: -6px -8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .bar-item:active {
+            background: rgba(0,0,0,0.06);
+        }
+
+        .bar-item.active {
+            background: rgba(0,113,227,0.1);
+        }
+
+        .bar-label {
+            width: 70px;
+            font-size: 12px;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .bar-value {
+            width: 32px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Wine Type Summary */
+        .wine-type-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .wine-type-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .wine-type-item:active {
+            background: rgba(0,0,0,0.04);
+        }
+
+        .wine-type-item.active {
+            background: rgba(0,113,227,0.08);
+            border-color: var(--accent);
+        }
+
+        .wine-type-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .wine-type-icon.red { background: linear-gradient(135deg, #9d174d 0%, #be185d 100%); }
+        .wine-type-icon.white { background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%); }
+        .wine-type-icon.sparkling { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); }
+        .wine-type-icon.sweet { background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); }
+
+        .wine-type-count {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .wine-type-label {
+            font-size: 9px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Active Filters */
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .active-filters:empty {
+            display: none;
+        }
+
+        .filter-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(0,113,227,0.1);
+            color: var(--accent);
+            border-radius: 980px;
+            font-size: 13px;
+        }
+
+        .filter-pill button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 16px;
+            padding: 0;
+            margin-left: 2px;
+            cursor: pointer;
+        }
+
+        /* Wines Section */
+        .wines-section {
+            margin-bottom: 20px;
+        }
+
+        .wines-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .wines-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .wines-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sort-btn:active {
+            background: var(--bg);
+        }
+
+        /* Wine Cards */
+        .wine-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .wine-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+        }
+
+        .wine-card:active {
+            transform: scale(0.98);
+        }
+
+        .wine-card.marked {
+            background: rgba(52, 199, 89, 0.08);
+            box-shadow: inset 3px 0 0 #34c759;
+        }
+
+        .wine-vintage-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .wine-vintage-badge.red { background: linear-gradient(135deg, #9d174d 0%, #be185d 100%); }
+        .wine-vintage-badge.white { background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%); }
+        .wine-vintage-badge.rose { background: linear-gradient(135deg, #db2777 0%, #ec4899 100%); }
+        .wine-vintage-badge.sparkling { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); }
+
+        .wine-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .wine-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.3;
+            margin-bottom: 3px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .wine-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .wine-meta .status-ready,
+        .wine-meta .status-hold,
+        .wine-meta .status-past {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .wine-meta .status-ready {
+            background: rgba(52,199,89,0.18);
+            color: #1a7f37;
+        }
+        .wine-meta .status-hold {
+            background: rgba(0,113,227,0.15);
+            color: #0055a3;
+        }
+        .wine-meta .status-past {
+            background: rgba(255,59,48,0.15);
+            color: #c22d25;
+        }
+
+        .wine-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        .wine-tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text-secondary);
+        }
+
+        .wine-tag.status-ready {
+            background: rgba(52,199,89,0.15);
+            color: #34c759;
+        }
+
+        .wine-tag.status-hold {
+            background: rgba(0,113,227,0.15);
+            color: #0071e3;
+        }
+
+        .wine-tag.status-past {
+            background: rgba(255,59,48,0.15);
+            color: #ff3b30;
+        }
+
+        .wine-tag.bin {
+            background: rgba(0,0,0,0.06);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .wine-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            margin-right: 48px;
+        }
+
+        .wine-qty {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .wine-value {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .pull-qty {
+            color: #34c759;
+        }
+
+        /* Pull Checkbox (always visible on card) */
+        .wine-card .pull-checkbox {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: 2px solid #34c759;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .wine-card .pull-checkbox:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+
+        .wine-card .pull-checkbox .icon-add {
+            color: #34c759;
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        .wine-card .pull-checkbox .icon-check {
+            display: none;
+        }
+
+        .wine-card.marked .pull-checkbox {
+            background: #34c759;
+            border-color: #34c759;
+        }
+
+        .wine-card.marked .pull-checkbox .icon-add {
+            display: none;
+        }
+
+        .wine-card.marked .pull-checkbox .icon-check {
+            display: block;
+        }
+
+        /* Load More */
+        .load-more {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .load-more-btn {
+            padding: 12px 24px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 980px;
+            font-size: 14px;
+            color: var(--accent);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .load-more-btn:active {
+            background: var(--bg);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Bottom Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-top: 1px solid var(--border);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .nav-content {
+            height: var(--nav-height);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+        }
+
+        .nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(14px);
+            min-width: 16px;
+            height: 16px;
+            background: #34c759;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .nav-item.has-badge .badge {
+            display: flex;
+        }
+
+        /* Filter Sheet */
+        .sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .sheet-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .filter-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 201;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            max-height: 85vh;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 36px;
+            height: 5px;
+            background: var(--text-tertiary);
+            border-radius: 3px;
+            margin: 10px auto;
+            opacity: 0.3;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sheet-header h2 {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .sheet-close {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: var(--bg);
+            border-radius: 50%;
+            font-size: 18px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheet-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .filter-group {
+            margin-bottom: 24px;
+        }
+
+        .filter-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .filter-group-header h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .filter-clear-btn {
+            font-size: 13px;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .filter-group.has-selection .filter-clear-btn {
+            opacity: 1;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-option {
+            padding: 10px 16px;
+            background: var(--bg);
+            border-radius: 980px;
+            font-size: 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .filter-option:active {
+            transform: scale(0.96);
+        }
+
+        .filter-option.selected {
+            background: var(--accent);
+            color: white;
+        }
+
+        .filter-option.disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .filter-option-count {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+
+        .sheet-footer {
+            padding: 16px 20px;
+            padding-bottom: calc(16px + var(--safe-bottom));
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .sheet-footer button {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-clear {
+            background: var(--bg);
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .btn-apply {
+            background: var(--accent);
+            border: none;
+            color: white;
+        }
+
+        /* Pull List Sheet */
+        .pull-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 201;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            max-height: 85vh;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pull-sheet.active {
+            transform: translateY(0);
+        }
+
+        .pull-sheet-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .location-group {
+            margin-bottom: 16px;
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #2d2d30 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .location-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            flex: 1;
+        }
+
+        .location-header .qty-controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .location-header .qty-btn {
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .location-header .qty-btn:disabled {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.3);
+        }
+
+        .location-header .qty-display {
+            color: white;
+            font-size: 13px;
+            min-width: 20px;
+        }
+
+        .location-header .pull-wine-remove {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 20px;
+            padding: 0 4px;
+            cursor: pointer;
+        }
+
+        .pull-wine-card {
+            background: var(--bg);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .pull-wine-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pull-wine-name {
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: white;
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .qty-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 6px;
+            background: var(--bg);
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:active:not(:disabled) {
+            background: var(--accent);
+            color: white;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.3;
+        }
+
+        .qty-display {
+            min-width: 40px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .qty-max {
+            font-weight: 400;
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+
+        .pull-wine-remove {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+        }
+
+        .pull-sheet-footer {
+            padding: 16px;
+            padding-bottom: calc(16px + var(--safe-bottom));
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .pull-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .pull-summary .label {
+            color: var(--text-secondary);
+        }
+
+        .pull-summary .value {
+            font-weight: 600;
+        }
+
+        .pull-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pull-actions button {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: #34c759;
+            border: none;
+            color: white;
+        }
+
+        .pull-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .pull-empty svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.4;
+            margin-bottom: 12px;
+        }
+
+        /* Wine Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 301;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            max-height: 90vh;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal.active {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            padding-top: 10px;
+            position: relative;
+        }
+
+        .modal-header .sheet-handle {
+            margin-bottom: 16px;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: rgba(0,0,0,0.06);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-close-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+        }
+
+        .modal-close-btn:active {
+            background: rgba(0,0,0,0.12);
+        }
+
+        .modal-wine-header {
+            display: flex;
+            gap: 14px;
+        }
+
+        .modal-vintage {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .modal-vintage.red { background: linear-gradient(135deg, #9d174d 0%, #be185d 100%); }
+        .modal-vintage.white { background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%); }
+        .modal-vintage.rose { background: linear-gradient(135deg, #db2777 0%, #ec4899 100%); }
+        .modal-vintage.sparkling { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); }
+
+        .modal-wine-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: calc(20px + var(--safe-bottom));
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h4 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .detail-item {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .detail-item .label {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            margin-bottom: 2px;
+        }
+
+        .detail-item .value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tasting-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .tasting-text strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .detail-tag {
+            padding: 6px 12px;
+            background: var(--bg);
+            border-radius: 980px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .detail-tag.aroma {
+            background: rgba(157,23,77,0.1);
+            color: var(--wine-red);
+        }
+
+        .detail-tag.flavor {
+            background: rgba(180,83,9,0.1);
+            color: var(--wine-gold);
+        }
+
+        .pairing-item {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .pairing-dish {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .pairing-reason {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            padding-bottom: calc(16px + var(--safe-bottom));
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-pull {
+            background: #34c759;
+            border: none;
+            color: white;
+        }
+
+        .btn-pull.marked {
+            background: var(--bg);
+            color: #34c759;
+            border: 2px solid #34c759;
+        }
+
+        /* Sort Sheet */
+        .sort-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 201;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sort-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sort-sheet .sheet-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sort-sheet .sheet-header h2 {
+            font-size: 15px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .sort-direction-toggle {
+            display: flex;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 2px;
+            margin-right: 12px;
+        }
+
+        .sort-direction-toggle button {
+            border: none;
+            background: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .sort-direction-toggle button.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .sort-direction-toggle button svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .sort-options {
+            padding: 8px 0;
+            padding-bottom: calc(8px + var(--safe-bottom));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .sort-option {
+            padding: 14px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+
+        .sort-option:active {
+            background: var(--bg);
+        }
+
+        .sort-option.selected {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .sort-option .check {
+            display: none;
+            color: var(--accent);
+        }
+
+        .sort-option.selected .check {
+            display: block;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://wine-explorer-puller-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">Wine Collection</div>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <span class="value" id="statWines">-</span>
+                    <span class="label">wines</span>
+                </div>
+                <div class="header-stat">
+                    <span class="value" id="statValue">-</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mini Charts Bar (appears when charts scroll off) -->
+    <div class="charts-mini-bar" id="chartsMiniBar">
+        <div class="mini-chart-icon" data-chart="location" title="Location">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="mini-chart-icon" data-chart="drink" title="Drink Window">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="mini-chart-icon" data-chart="vintage" title="Vintage">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="mini-chart-icon" data-chart="varietal" title="Varietal">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8 6 4 10 4 14c0 4.4 3.6 8 8 8s8-3.6 8-8c0-4-4-8-8-12z"/></svg>
+        </div>
+                <svg class="mini-bar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Search -->
+        <div class="search-container">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search wines...">
+            </div>
+        </div>
+
+        <!-- Charts Carousel -->
+        <div class="charts-section">
+            <div class="charts-scroll" id="chartsScroll">
+                <!-- Country/Region Chart -->
+                <div class="chart-card" id="locationChart">
+                    <div class="chart-header">
+                        <div>
+                            <h3 id="locationTitle">By Country</h3>
+                            <span class="chart-breadcrumb" id="locationBreadcrumb"></span>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" id="locationBack">Back</button>
+                            <button class="chart-btn" id="locationClear">Clear</button>
+                            <button class="chart-btn" id="locationExpand">Show all</button>
+                        </div>
+                    </div>
+                    <div class="bar-chart" id="locationBars"></div>
+                </div>
+
+                <!-- Drink Window Chart -->
+                <div class="chart-card" id="drinkChart">
+                    <div class="chart-header">
+                        <h3>Drink Window</h3>
+                        <div class="chart-actions">
+                            <button class="chart-btn" id="drinkClear">Clear</button>
+                        </div>
+                    </div>
+                    <div class="bar-chart" id="drinkBars"></div>
+                    <div class="wine-type-row" id="wineTypeSummary"></div>
+                </div>
+
+                <!-- Vintage Chart -->
+                <div class="chart-card" id="vintageChart">
+                    <div class="chart-header">
+                        <h3>By Vintage</h3>
+                        <div class="chart-actions">
+                            <button class="chart-btn" id="vintageClear">Clear</button>
+                            <button class="chart-btn" id="vintageExpand">Show all</button>
+                        </div>
+                    </div>
+                    <div class="bar-chart" id="vintageBars"></div>
+                </div>
+
+                <!-- Varietal Chart -->
+                <div class="chart-card" id="varietalChart">
+                    <div class="chart-header">
+                        <h3>Top Varietals</h3>
+                        <div class="chart-actions">
+                            <button class="chart-btn" id="varietalClear">Clear</button>
+                            <button class="chart-btn" id="varietalExpand">Show all</button>
+                        </div>
+                    </div>
+                    <div class="bar-chart" id="varietalBars"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Filters -->
+        <div class="active-filters" id="activeFilters"></div>
+
+        <!-- Wines Section -->
+        <div class="wines-section">
+            <div class="wines-header">
+                <div class="wines-title">Wines <span class="wines-count" id="winesCount"></span></div>
+                <button class="sort-btn" id="sortBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M6 12h12M9 18h6"/>
+                    </svg>
+                    Sort
+                </button>
+            </div>
+            <div class="wine-list" id="wineList"></div>
+            <div class="load-more" id="loadMore" style="display: none;">
+                <button class="load-more-btn" id="loadMoreBtn">Load More</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav>
+        <div class="nav-content">
+            <button class="nav-item active" id="navHome">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" id="navFilter">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                <span>Filter</span>
+                <span class="badge" id="filterBadge">0</span>
+            </button>
+            <button class="nav-item" id="navPull">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 21h8M12 15V3M12 3l4 4M12 3L8 7"/>
+                </svg>
+                <span>Pull List</span>
+                <span class="badge" id="pullBadge">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Filter Sheet -->
+    <div class="sheet-overlay" id="filterOverlay"></div>
+    <div class="filter-sheet" id="filterSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2>Filters</h2>
+            <button class="sheet-close" id="filterClose">×</button>
+        </div>
+        <div class="sheet-body" id="filterSheetBody"></div>
+        <div class="sheet-footer">
+            <button class="btn-clear" id="filterClearAll">Clear All</button>
+            <button class="btn-apply" id="filterApply">Apply</button>
+        </div>
+    </div>
+
+    <!-- Pull List Sheet -->
+    <div class="pull-sheet" id="pullSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2>Pull List <span id="pullSheetCount"></span></h2>
+            <button class="sheet-close" id="pullClose">×</button>
+        </div>
+        <div class="pull-sheet-body" id="pullSheetBody"></div>
+        <div class="pull-sheet-footer" id="pullSheetFooter">
+            <div class="pull-summary">
+                <span class="label">Total bottles</span>
+                <span class="value" id="pullTotalBottles">0</span>
+            </div>
+            <div class="pull-summary">
+                <span class="label">Total value</span>
+                <span class="value" id="pullTotalValue">$0</span>
+            </div>
+            <div class="pull-actions">
+                <button class="btn-secondary" id="pullClear">Clear List</button>
+                <button class="btn-primary" id="pullCopy">Copy List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sort Sheet -->
+    <div class="sort-sheet" id="sortSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2>Sort</h2>
+            <div class="sort-direction-toggle">
+                <button id="sortAsc" class="active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    Asc
+                </button>
+                <button id="sortDesc">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    Desc
+                </button>
+            </div>
+            <button class="sheet-close" id="sortClose">×</button>
+        </div>
+        <div class="sort-options" id="sortOptions">
+            <div class="sort-option" data-sort="wine_name">
+                <span>Name</span>
+                <span class="check">✓</span>
+            </div>
+            <div class="sort-option" data-sort="vintage">
+                <span>Vintage</span>
+                <span class="check">✓</span>
+            </div>
+            <div class="sort-option" data-sort="valuation">
+                <span>Value</span>
+                <span class="check">✓</span>
+            </div>
+            <div class="sort-option" data-sort="quantity">
+                <span>Quantity</span>
+                <span class="check">✓</span>
+            </div>
+            <div class="sort-option" data-sort="drink_date_min">
+                <span>Drink Start</span>
+                <span class="check">✓</span>
+            </div>
+            <div class="sort-option" data-sort="drink_date_max">
+                <span>Drink End</span>
+                <span class="check">✓</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wine Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="wineModal">
+        <div class="modal-header">
+            <div class="sheet-handle"></div>
+            <button class="modal-close-btn" id="modalCloseBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="modal-wine-header">
+                <div class="modal-vintage" id="modalVintage"></div>
+                <div class="modal-wine-info">
+                    <div class="modal-title" id="modalTitle"></div>
+                    <div class="modal-subtitle" id="modalSubtitle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+            <button class="btn-pull" id="modalPullBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 21h8M12 15V3M12 3l4 4M12 3L8 7"/>
+                </svg>
+                <span id="modalPullText">Add to Pull List</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let wineData = null;
+        let filteredWines = [];
+        let displayedCount = 20;
+        let markedForRemoval = new Map();
+        let activeFilters = {
+            search: '',
+            country: null,
+            region: null,
+            varietal: null,
+            producer: null,
+            vintage: null,
+            drinkWindow: null,
+            wineType: null
+        };
+        let sortConfig = { key: 'wine_name', direction: 'asc' };
+        let locationDrillLevel = 'country';
+        let selectedCountry = null;
+        let selectedRegion = null;
+        let currentModalWine = null;
+        let expandedCharts = { location: false, vintage: false, varietal: false };
+        let demoMode = false;
+        const currentYear = new Date().getFullYear();
+        const DEFAULT_CHART_ROWS = 6;
+
+        const chartColors = [
+            '#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30',
+            '#5ac8fa', '#ffcc00', '#ff2d55', '#a2845e', '#00c7be'
+        ];
+
+        const drinkColors = {
+            'Ready Now': '#34c759',
+            'Hold': '#0071e3',
+            'Past Peak': '#ff3b30'
+        };
+
+        // Load data
+        async function loadWineData() {
+            try {
+                const response = await fetch('wine_collection.json');
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                wineData = await response.json();
+                if (!wineData || !wineData.wines) throw new Error('Invalid data structure');
+                filteredWines = [...wineData.wines];
+                initializeApp();
+            } catch (error) {
+                console.error('Load error:', error);
+                document.getElementById('wineList').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Unable to load wines</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function initializeApp() {
+            try {
+                await loadMarkedWines();
+                listenToDemoMode();
+                updateStats();
+                renderCharts();
+                renderWines();
+                buildFilterSheet();
+                setupEventListeners();
+                updateMarkedWinesUI();
+            } catch (error) {
+                console.error('Init error:', error);
+            }
+        }
+
+        function listenToDemoMode() {
+            database.ref('settings/demoMode').on('value', (snapshot) => {
+                demoMode = snapshot.val() || false;
+                updateStats();
+                renderWines();
+                renderPullSheet();
+            });
+        }
+
+        function formatValue(amount) {
+            if (demoMode) return '---';
+            return '$' + Math.round(amount).toLocaleString();
+        }
+
+        // Stats
+        function updateStats() {
+            const wines = filteredWines;
+            const totalValue = wines.reduce((sum, w) => sum + (parseFloat(w.valuation || 0) * parseInt(w.quantity || 1)), 0);
+
+            document.getElementById('statWines').textContent = wines.length.toLocaleString();
+            document.getElementById('statValue').textContent = formatValue(totalValue);
+        }
+
+        function getDrinkStatus(wine) {
+            const minYear = parseInt(wine.drink_date_min) || parseInt(wine.drink_from_year) || 0;
+            const maxYear = parseInt(wine.drink_date_max) || parseInt(wine.drink_by_year) || 9999;
+            if (currentYear < minYear) return 'Hold';
+            if (currentYear > maxYear) return 'Past Peak';
+            return 'Ready Now';
+        }
+
+        function formatVintage(vintage) {
+            if (!vintage || vintage === '1001' || vintage === 1001) return 'NV';
+            return vintage;
+        }
+
+        function formatDrinkWindow(wine) {
+            const fromYear = parseInt(wine.drink_date_min) || parseInt(wine.drink_from_year) || null;
+            const toYear = parseInt(wine.drink_date_max) || parseInt(wine.drink_by_year) || null;
+            if (fromYear && toYear) return `${fromYear}–${toYear}`;
+            if (fromYear) return `${fromYear}+`;
+            if (toYear) return `Until ${toYear}`;
+            return 'Anytime';
+        }
+
+        function getColorClass(wine) {
+            const type = (wine.type || '').toLowerCase();
+            if (type.includes('white')) return 'white';
+            if (type.includes('rose') || type.includes('rosé')) return 'rose';
+            if (type.includes('sparkling')) return 'sparkling';
+            return 'red';
+        }
+
+        function getWineType(wine) {
+            const type = (wine.type || '').toLowerCase();
+            const category = (wine.category || '').toLowerCase();
+
+            if (type.includes('sparkling') || type.includes('champagne')) return 'sparkling';
+            if (type.includes('dessert') || type.includes('sweet') || type.includes('fortified') ||
+                type.includes('port') || type.includes('sherry') || type.includes('madeira') ||
+                category.includes('sweet') || category.includes('dessert')) return 'sweet';
+            if (type.includes('white')) return 'white';
+            if (type.includes('rose') || type.includes('rosé')) return 'white';
+            return 'red';
+        }
+
+        // Charts
+        function renderCharts() {
+            renderLocationChart();
+            renderDrinkChart();
+            renderVintageChart();
+            renderVarietalChart();
+            updateChartClearButtons();
+        }
+
+        function updateChartClearButtons() {
+            const locationClear = document.getElementById('locationClear');
+            const locationBack = document.getElementById('locationBack');
+            locationClear.classList.toggle('visible', !!(activeFilters.country || activeFilters.region || activeFilters.producer));
+            locationBack.classList.toggle('visible', locationDrillLevel !== 'country');
+
+            document.getElementById('drinkClear').classList.toggle('visible', !!(activeFilters.drinkWindow || activeFilters.wineType));
+            document.getElementById('vintageClear').classList.toggle('visible', !!activeFilters.vintage);
+            document.getElementById('varietalClear').classList.toggle('visible', !!activeFilters.varietal);
+        }
+
+        function renderLocationChart() {
+            const title = document.getElementById('locationTitle');
+            const breadcrumb = document.getElementById('locationBreadcrumb');
+            const expandBtn = document.getElementById('locationExpand');
+            const maxItems = expandedCharts.location ? 100 : DEFAULT_CHART_ROWS;
+
+            if (locationDrillLevel === 'country') {
+                title.textContent = 'By Country';
+                breadcrumb.textContent = '';
+
+                const data = {};
+                filteredWines.forEach(w => {
+                    const country = w.country || 'Unknown';
+                    data[country] = (data[country] || 0) + parseInt(w.quantity || 1);
+                });
+
+                const allEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                const entries = allEntries.slice(0, maxItems);
+                updateExpandButton(expandBtn, allEntries.length, expandedCharts.location);
+                renderBarChart('locationBars', entries, 'drillCountry', activeFilters.country);
+            } else if (locationDrillLevel === 'region') {
+                title.textContent = 'By Region';
+                breadcrumb.textContent = selectedCountry;
+
+                const data = {};
+                filteredWines.filter(w => w.country === selectedCountry).forEach(w => {
+                    const region = w.region || 'Unknown';
+                    data[region] = (data[region] || 0) + parseInt(w.quantity || 1);
+                });
+
+                const allEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                const entries = allEntries.slice(0, maxItems);
+                updateExpandButton(expandBtn, allEntries.length, expandedCharts.location);
+                renderBarChart('locationBars', entries, 'drillRegion', activeFilters.region);
+            } else {
+                title.textContent = 'By Producer';
+                breadcrumb.textContent = `${selectedCountry} > ${selectedRegion}`;
+
+                const data = {};
+                filteredWines.filter(w => w.country === selectedCountry && w.region === selectedRegion).forEach(w => {
+                    const producer = w.producer || 'Unknown';
+                    data[producer] = (data[producer] || 0) + parseInt(w.quantity || 1);
+                });
+
+                const allEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                const entries = allEntries.slice(0, maxItems);
+                updateExpandButton(expandBtn, allEntries.length, expandedCharts.location);
+                renderBarChart('locationBars', entries, 'producer', activeFilters.producer);
+            }
+        }
+
+        function renderDrinkChart() {
+            const data = { 'Ready Now': 0, 'Hold': 0, 'Past Peak': 0 };
+            const typeData = { red: 0, white: 0, sparkling: 0, sweet: 0 };
+
+            filteredWines.forEach(w => {
+                const status = getDrinkStatus(w);
+                const qty = parseInt(w.quantity || 1);
+                data[status] += qty;
+                const wineType = getWineType(w);
+                typeData[wineType] += qty;
+            });
+
+            const container = document.getElementById('drinkBars');
+            const entries = Object.entries(data).filter(([_, v]) => v > 0);
+            const maxValue = Math.max(...entries.map(e => e[1])) || 1;
+
+            container.innerHTML = entries.map(([label, count]) => `
+                <div class="bar-item ${activeFilters.drinkWindow === label ? 'active' : ''}"
+                     data-filter="drinkWindow" data-value="${label}">
+                    <span class="bar-label">${label}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: ${(count / maxValue) * 100}%; background: ${drinkColors[label]}"></div>
+                    </div>
+                    <span class="bar-value">${count}</span>
+                </div>
+            `).join('');
+
+            const summaryContainer = document.getElementById('wineTypeSummary');
+            const typeIcons = [
+                { key: 'red', icon: '🍷', label: 'Red' },
+                { key: 'white', icon: '🥂', label: 'White' },
+                { key: 'sparkling', icon: '✨', label: 'Sparkle' },
+                { key: 'sweet', icon: '🍯', label: 'Sweet' }
+            ];
+
+            summaryContainer.innerHTML = typeIcons
+                .filter(t => typeData[t.key] > 0)
+                .map(t => `
+                    <div class="wine-type-item ${activeFilters.wineType === t.key ? 'active' : ''}"
+                         data-filter="wineType" data-value="${t.key}">
+                        <div class="wine-type-icon ${t.key}">${t.icon}</div>
+                        <span class="wine-type-count">${typeData[t.key]}</span>
+                        <span class="wine-type-label">${t.label}</span>
+                    </div>
+                `).join('');
+        }
+
+        function renderVintageChart() {
+            const expandBtn = document.getElementById('vintageExpand');
+            const maxItems = expandedCharts.vintage ? 100 : DEFAULT_CHART_ROWS;
+
+            const data = {};
+            filteredWines.forEach(w => {
+                const vintage = formatVintage(w.vintage);
+                data[vintage] = (data[vintage] || 0) + parseInt(w.quantity || 1);
+            });
+
+            const allEntries = Object.entries(data)
+                .sort((a, b) => {
+                    if (a[0] === 'NV') return 1;
+                    if (b[0] === 'NV') return -1;
+                    return parseInt(b[0]) - parseInt(a[0]);
+                });
+            const entries = allEntries.slice(0, maxItems);
+            updateExpandButton(expandBtn, allEntries.length, expandedCharts.vintage);
+            renderBarChart('vintageBars', entries, 'vintage', activeFilters.vintage);
+        }
+
+        function renderVarietalChart() {
+            const expandBtn = document.getElementById('varietalExpand');
+            const maxItems = expandedCharts.varietal ? 100 : DEFAULT_CHART_ROWS;
+
+            const data = {};
+            filteredWines.forEach(w => {
+                const varietal = w.varietal || 'Unknown';
+                data[varietal] = (data[varietal] || 0) + parseInt(w.quantity || 1);
+            });
+
+            const allEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+            const entries = allEntries.slice(0, maxItems);
+            updateExpandButton(expandBtn, allEntries.length, expandedCharts.varietal);
+            renderBarChart('varietalBars', entries, 'varietal', activeFilters.varietal);
+        }
+
+        function renderBarChart(containerId, entries, action, activeValue) {
+            const container = document.getElementById(containerId);
+            const maxValue = entries[0]?.[1] || 1;
+
+            container.innerHTML = entries.map(([label, count], i) => `
+                <div class="bar-item ${activeValue === label ? 'active' : ''}"
+                     data-action="${action}" data-value="${label}">
+                    <span class="bar-label" title="${label}">${label}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: ${(count / maxValue) * 100}%; background: ${chartColors[i % chartColors.length]}"></div>
+                    </div>
+                    <span class="bar-value">${count}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateExpandButton(btn, totalCount, isExpanded) {
+            if (!btn) return;
+            if (totalCount > DEFAULT_CHART_ROWS) {
+                btn.classList.add('visible');
+                btn.textContent = isExpanded ? 'Show less' : `Show all (${totalCount})`;
+            } else {
+                btn.classList.remove('visible');
+            }
+        }
+
+        function toggleExpand(chart) {
+            expandedCharts[chart] = !expandedCharts[chart];
+            renderCharts();
+        }
+
+        // Wine List
+        function renderWines() {
+            const list = document.getElementById('wineList');
+            const count = document.getElementById('winesCount');
+            const loadMore = document.getElementById('loadMore');
+
+            count.textContent = `(${filteredWines.length})`;
+
+            if (filteredWines.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No wines found</h3>
+                        <p>Try adjusting your filters</p>
+                    </div>
+                `;
+                loadMore.style.display = 'none';
+                return;
+            }
+
+            let sortedWines = [...filteredWines];
+            if (sortConfig.key) {
+                sortedWines.sort((a, b) => {
+                    let aVal, bVal;
+
+                    if (sortConfig.key === 'quantity' || sortConfig.key === 'valuation' || sortConfig.key === 'drink_date_min' || sortConfig.key === 'drink_date_max') {
+                        aVal = parseFloat(a[sortConfig.key]) || 0;
+                        bVal = parseFloat(b[sortConfig.key]) || 0;
+                    } else if (sortConfig.key === 'vintage') {
+                        aVal = a.vintage === 'NV' || a.vintage === 1001 ? 0 : parseInt(a.vintage) || 0;
+                        bVal = b.vintage === 'NV' || b.vintage === 1001 ? 0 : parseInt(b.vintage) || 0;
+                    } else {
+                        aVal = (a[sortConfig.key] || '').toLowerCase();
+                        bVal = (b[sortConfig.key] || '').toLowerCase();
+                    }
+
+                    if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            const winesToShow = sortedWines.slice(0, displayedCount);
+
+            list.innerHTML = winesToShow.map(wine => {
+                const colorClass = getColorClass(wine);
+                const drinkStatus = getDrinkStatus(wine);
+                const statusClass = drinkStatus === 'Ready Now' ? 'status-ready' :
+                                   drinkStatus === 'Hold' ? 'status-hold' : 'status-past';
+                const isMarked = markedForRemoval.has(wine.id);
+                const pullQty = markedForRemoval.get(wine.id) || 0;
+                const totalQty = parseInt(wine.quantity || 1);
+
+                return `
+                    <div class="wine-card ${isMarked ? 'marked' : ''}" data-id="${wine.id}">
+                        <div class="wine-vintage-badge ${colorClass}">${formatVintage(wine.vintage)}</div>
+                        <div class="wine-info">
+                            <div class="wine-name">${wine.wine_name || 'Unknown Wine'}</div>
+                            <div class="wine-meta"><span class="${statusClass}">${formatDrinkWindow(wine)}</span> · ${wine.region || ''}</div>
+                            <div class="wine-details">
+                                <span class="wine-tag">${wine.varietal || '-'}</span>
+                                ${wine.bin ? `<span class="wine-tag bin">${wine.bin}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="wine-right">
+                            <div class="wine-qty">${isMarked ? `<span class="pull-qty">${pullQty}/</span>` : ''}${totalQty}</div>
+                            <div class="wine-value">${formatValue(parseFloat(wine.valuation || 0))}</div>
+                        </div>
+                        <div class="pull-checkbox" data-wine-id="${wine.id}">
+                            <span class="icon-add">+</span>
+                            <svg class="icon-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <path d="M20 6L9 17l-5-5"/>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            loadMore.style.display = displayedCount < sortedWines.length ? 'block' : 'none';
+        }
+
+        // Filter Sheet
+        function buildFilterSheet() {
+            const filterConfigs = [
+                { key: 'country', label: 'Country', getter: w => w.country },
+                { key: 'region', label: 'Region', getter: w => w.region },
+                { key: 'varietal', label: 'Varietal', getter: w => w.varietal },
+                { key: 'vintage', label: 'Vintage', getter: w => w.vintage, sort: (a, b) => parseInt(b) - parseInt(a) }
+            ];
+
+            const body = document.getElementById('filterSheetBody');
+            body.innerHTML = filterConfigs.map(config => {
+                const options = getFilterOptions(config.key, config.getter, config.sort);
+                return `
+                    <div class="filter-group ${activeFilters[config.key] ? 'has-selection' : ''}" data-filter="${config.key}">
+                        <div class="filter-group-header">
+                            <h4>${config.label}</h4>
+                            <button class="filter-clear-btn" data-filter="${config.key}">Clear</button>
+                        </div>
+                        <div class="filter-options">
+                            ${options.slice(0, 12).map(opt => `
+                                <div class="filter-option ${activeFilters[config.key] === opt.value ? 'selected' : ''} ${opt.disabled ? 'disabled' : ''}"
+                                     data-filter="${config.key}" data-value="${opt.value}">
+                                    ${opt.value}<span class="filter-option-count">${opt.count}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getFilterOptions(filterKey, getter, sortFn) {
+            const counts = {};
+            const availableCounts = {};
+
+            wineData.wines.forEach(w => {
+                const val = getter(w);
+                if (val) counts[val] = (counts[val] || 0) + 1;
+            });
+
+            const tempFilters = { ...activeFilters };
+            tempFilters[filterKey] = null;
+
+            wineData.wines.forEach(w => {
+                if (matchesFilters(w, tempFilters)) {
+                    const val = getter(w);
+                    if (val) availableCounts[val] = (availableCounts[val] || 0) + 1;
+                }
+            });
+
+            let options = Object.keys(counts).map(value => ({
+                value,
+                count: availableCounts[value] || 0,
+                disabled: !availableCounts[value]
+            }));
+
+            if (sortFn) {
+                options.sort((a, b) => sortFn(a.value, b.value));
+            } else {
+                options.sort((a, b) => b.count - a.count);
+            }
+
+            return options;
+        }
+
+        function matchesFilters(wine, filters = activeFilters) {
+            if (filters.search) {
+                const search = filters.search.toLowerCase();
+                const searchFields = [wine.wine_name, wine.producer, wine.varietal, wine.region, wine.country].filter(Boolean).join(' ').toLowerCase();
+                if (!searchFields.includes(search)) return false;
+            }
+            if (filters.country && wine.country !== filters.country) return false;
+            if (filters.region && wine.region !== filters.region) return false;
+            if (filters.varietal && wine.varietal !== filters.varietal) return false;
+            if (filters.producer && wine.producer !== filters.producer) return false;
+            if (filters.vintage && String(wine.vintage) !== String(filters.vintage)) return false;
+            if (filters.drinkWindow) {
+                const status = getDrinkStatus(wine);
+                if (status !== filters.drinkWindow) return false;
+            }
+            if (filters.wineType) {
+                const wineType = getWineType(wine);
+                if (wineType !== filters.wineType) return false;
+            }
+            return true;
+        }
+
+        function applyFilters() {
+            filteredWines = wineData.wines.filter(w => matchesFilters(w));
+            displayedCount = 20;
+            updateStats();
+            renderCharts();
+            renderWines();
+            buildFilterSheet();
+            updateFilterUI();
+        }
+
+        function updateFilterUI() {
+            const count = Object.values(activeFilters).filter(v => v).length;
+            const navFilter = document.getElementById('navFilter');
+            const filterBadge = document.getElementById('filterBadge');
+
+            if (count > 0) {
+                navFilter.classList.add('has-badge');
+                filterBadge.textContent = count;
+            } else {
+                navFilter.classList.remove('has-badge');
+            }
+
+            const pillsContainer = document.getElementById('activeFilters');
+            const pills = [];
+            const typeLabels = { red: 'Red Wine', white: 'White Wine', sparkling: 'Sparkling', sweet: 'Sweet/Fortified' };
+            Object.entries(activeFilters).forEach(([key, value]) => {
+                if (value && key !== 'search') {
+                    const displayValue = key === 'wineType' ? typeLabels[value] : value;
+                    pills.push(`
+                        <div class="filter-pill">
+                            <span>${displayValue}</span>
+                            <button data-filter="${key}">×</button>
+                        </div>
+                    `);
+                }
+            });
+            pillsContainer.innerHTML = pills.join('');
+
+            // Update mini bar filter indicators
+            if (window.updateMiniBarFilters) {
+                window.updateMiniBarFilters();
+            }
+        }
+
+        function setFilter(key, value) {
+            if (activeFilters[key] === value) {
+                activeFilters[key] = null;
+            } else {
+                activeFilters[key] = value;
+            }
+            applyFilters();
+        }
+
+        function clearFilter(key) {
+            activeFilters[key] = null;
+            if (key === 'country') {
+                locationDrillLevel = 'country';
+                selectedCountry = null;
+                selectedRegion = null;
+                activeFilters.region = null;
+                activeFilters.producer = null;
+            } else if (key === 'region') {
+                locationDrillLevel = 'region';
+                selectedRegion = null;
+                activeFilters.producer = null;
+            }
+            applyFilters();
+        }
+
+        function clearAllFilters() {
+            Object.keys(activeFilters).forEach(k => activeFilters[k] = null);
+            activeFilters.search = '';
+            document.getElementById('searchInput').value = '';
+            locationDrillLevel = 'country';
+            selectedCountry = null;
+            selectedRegion = null;
+            applyFilters();
+        }
+
+        function drillIntoCountry(country) {
+            selectedCountry = country;
+            locationDrillLevel = 'region';
+            activeFilters.country = country;
+            applyFilters();
+        }
+
+        function drillIntoRegion(region) {
+            selectedRegion = region;
+            locationDrillLevel = 'producer';
+            activeFilters.region = region;
+            applyFilters();
+        }
+
+        function drillBack() {
+            if (locationDrillLevel === 'producer') {
+                locationDrillLevel = 'region';
+                selectedRegion = null;
+                activeFilters.region = null;
+                activeFilters.producer = null;
+            } else {
+                locationDrillLevel = 'country';
+                selectedCountry = null;
+                selectedRegion = null;
+                activeFilters.country = null;
+                activeFilters.region = null;
+                activeFilters.producer = null;
+            }
+            applyFilters();
+        }
+
+        // Wine Modal
+        function showWineDetail(wineId) {
+            const wine = wineData.wines.find(w => w.id === wineId);
+            if (!wine) return;
+
+            currentModalWine = wine;
+
+            const vintage = document.getElementById('modalVintage');
+            const title = document.getElementById('modalTitle');
+            const subtitle = document.getElementById('modalSubtitle');
+            const body = document.getElementById('modalBody');
+
+            vintage.className = 'modal-vintage ' + getColorClass(wine);
+            vintage.textContent = formatVintage(wine.vintage);
+            title.textContent = wine.wine_name || 'Unknown Wine';
+            subtitle.textContent = `${wine.producer || ''} · ${wine.region || ''}, ${wine.country || ''}`;
+
+            let html = `
+                <div class="modal-section">
+                    <h4>Details</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="label">Type</div>
+                            <div class="value">${wine.type || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Varietal</div>
+                            <div class="value">${wine.varietal || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Quantity</div>
+                            <div class="value">${wine.quantity || 1} bottles</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Value</div>
+                            <div class="value">${formatValue(parseFloat(wine.valuation || 0))}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Location</div>
+                            <div class="value">${wine.location || '-'} ${wine.bin || ''}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="label">Status</div>
+                            <div class="value">${getDrinkStatus(wine)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (wine.characteristics) {
+                html += `
+                    <div class="modal-section">
+                        <h4>Characteristics</h4>
+                        <div class="detail-grid">
+                            ${Object.entries(wine.characteristics).map(([k, v]) => `
+                                <div class="detail-item">
+                                    <div class="label">${k}</div>
+                                    <div class="value">${v || '-'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (wine.tasting_notes) {
+                const notes = Object.entries(wine.tasting_notes).filter(([k, v]) => v);
+                if (notes.length > 0) {
+                    html += `
+                        <div class="modal-section">
+                            <h4>Tasting Notes</h4>
+                            ${notes.map(([k, v]) => `
+                                <p class="tasting-text"><strong>${k.charAt(0).toUpperCase() + k.slice(1)}:</strong> ${v}</p>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+
+            if ((wine.aroma_descriptors?.length) || (wine.flavor_descriptors?.length)) {
+                html += `
+                    <div class="modal-section">
+                        <h4>Aroma & Flavor</h4>
+                        <div class="tags-row">
+                            ${(wine.aroma_descriptors || []).map(d => `<span class="detail-tag aroma">${d}</span>`).join('')}
+                            ${(wine.flavor_descriptors || []).map(d => `<span class="detail-tag flavor">${d}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (wine.food_pairings?.length) {
+                html += `
+                    <div class="modal-section">
+                        <h4>Food Pairings</h4>
+                        ${wine.food_pairings.slice(0, 3).map(p => `
+                            <div class="pairing-item">
+                                <div class="pairing-dish">${p.dish}</div>
+                                <div class="pairing-reason">${p.reason}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            body.innerHTML = html;
+            updateModalPullButton();
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('wineModal').classList.add('active');
+        }
+
+        function updateModalPullButton() {
+            if (!currentModalWine) return;
+            const isMarked = markedForRemoval.has(currentModalWine.id);
+            const btn = document.getElementById('modalPullBtn');
+            const text = document.getElementById('modalPullText');
+
+            btn.classList.toggle('marked', isMarked);
+            text.textContent = isMarked ? 'Remove from Pull List' : 'Add to Pull List';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('wineModal');
+            modal.style.transform = '';
+            document.getElementById('modalOverlay').classList.remove('active');
+            modal.classList.remove('active');
+            currentModalWine = null;
+        }
+
+        // Swipe-down-to-close for modal
+        function setupModalSwipe() {
+            const modal = document.getElementById('wineModal');
+            const modalHeader = modal.querySelector('.modal-header');
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            modalHeader.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                currentY = startY;
+                isDragging = true;
+                modal.style.transition = 'none';
+            }, { passive: false });
+
+            modalHeader.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+
+                // Only allow dragging down
+                if (deltaY > 0) {
+                    e.preventDefault(); // Prevent browser pull-to-refresh
+                    modal.style.transform = `translateY(${deltaY}px)`;
+                    // Fade overlay as modal is dragged
+                    const opacity = Math.max(0, 1 - (deltaY / 300));
+                    document.getElementById('modalOverlay').style.opacity = opacity;
+                }
+            }, { passive: false });
+
+            modalHeader.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+
+                const deltaY = currentY - startY;
+                modal.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                document.getElementById('modalOverlay').style.transition = 'opacity 0.3s';
+
+                // Close if dragged more than 100px down
+                if (deltaY > 100) {
+                    closeModal();
+                } else {
+                    // Snap back
+                    modal.style.transform = 'translateY(0)';
+                    document.getElementById('modalOverlay').style.opacity = '1';
+                }
+
+                // Reset transition after animation
+                setTimeout(() => {
+                    modal.style.transition = '';
+                    document.getElementById('modalOverlay').style.transition = '';
+                    document.getElementById('modalOverlay').style.opacity = '';
+                }, 300);
+            });
+        }
+
+        // Marked Wines Functions
+        function toggleMarkWine(wineId) {
+            if (markedForRemoval.has(wineId)) {
+                markedForRemoval.delete(wineId);
+            } else {
+                markedForRemoval.set(wineId, 1);
+            }
+            saveMarkedWines();
+            updateMarkedWinesUI();
+            renderWines();
+            updateModalPullButton();
+        }
+
+        function adjustPullQuantity(wineId, delta) {
+            const wine = wineData.wines.find(w => w.id === wineId);
+            if (!wine) return;
+
+            const maxQty = parseInt(wine.quantity || 1);
+            const currentQty = markedForRemoval.get(wineId) || 0;
+            const newQty = Math.max(0, Math.min(maxQty, currentQty + delta));
+
+            if (newQty === 0) {
+                markedForRemoval.delete(wineId);
+            } else {
+                markedForRemoval.set(wineId, newQty);
+            }
+
+            saveMarkedWines();
+            updateMarkedWinesUI();
+            renderWines();
+        }
+
+        function saveMarkedWines() {
+            const data = {
+                lastUpdated: new Date().toISOString(),
+                pullList: Object.fromEntries(markedForRemoval)
+            };
+            database.ref('pullList').set(data)
+                .catch(err => console.log('Could not save to Firebase:', err));
+        }
+
+        async function loadMarkedWines() {
+            try {
+                const snapshot = await database.ref('pullList').once('value');
+                const data = snapshot.val();
+                if (data && data.pullList) {
+                    markedForRemoval = new Map(Object.entries(data.pullList));
+                }
+            } catch (err) {
+                console.log('Could not load pull list from Firebase:', err);
+            }
+        }
+
+        function updateMarkedWinesUI() {
+            const bottleCount = Array.from(markedForRemoval.values()).reduce((sum, qty) => sum + qty, 0);
+            const navPull = document.getElementById('navPull');
+            const pullBadge = document.getElementById('pullBadge');
+
+            if (bottleCount > 0) {
+                navPull.classList.add('has-badge');
+                pullBadge.textContent = bottleCount;
+            } else {
+                navPull.classList.remove('has-badge');
+            }
+
+            renderPullSheet();
+        }
+
+        function renderPullSheet() {
+            const body = document.getElementById('pullSheetBody');
+            const footer = document.getElementById('pullSheetFooter');
+            const countEl = document.getElementById('pullSheetCount');
+
+            const bottleCount = Array.from(markedForRemoval.values()).reduce((sum, qty) => sum + qty, 0);
+            countEl.textContent = `(${bottleCount} bottles)`;
+
+            if (!wineData || markedForRemoval.size === 0) {
+                body.innerHTML = `
+                    <div class="pull-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M8 21h8M12 15V3M12 3l4 4M12 3L8 7"/>
+                        </svg>
+                        <p>No wines selected to pull</p>
+                    </div>
+                `;
+                footer.style.display = 'none';
+                return;
+            }
+
+            footer.style.display = 'block';
+            const markedWines = wineData.wines.filter(w => markedForRemoval.has(w.id));
+            let totalBottles = 0;
+            let totalValue = 0;
+
+            const byLocation = {};
+            markedWines.forEach(wine => {
+                const loc = wine.location || 'Unknown Location';
+                const bin = wine.bin || '';
+                const key = bin ? `${loc} / ${bin}` : loc;
+                if (!byLocation[key]) byLocation[key] = [];
+                byLocation[key].push(wine);
+            });
+
+            // Sort locations with proper bin ordering (A1, A2...A16, B1, B2...B16)
+            const parseBin = (str) => {
+                const binMatch = str.match(/\/\s*([A-Za-z]*)(\d*)\s*$/);
+                if (!binMatch) return ['', str, 0];
+                return [binMatch[1].toUpperCase(), str, parseInt(binMatch[2]) || 0];
+            };
+            const sortedLocations = Object.keys(byLocation).sort((a, b) => {
+                const [aLetter, , aNum] = parseBin(a);
+                const [bLetter, , bNum] = parseBin(b);
+                if (aLetter !== bLetter) return aLetter.localeCompare(bLetter);
+                return aNum - bNum;
+            });
+
+            body.innerHTML = sortedLocations.map(location => {
+                const wines = byLocation[location];
+
+                return wines.map(wine => {
+                    const maxQty = parseInt(wine.quantity || 1);
+                    const pullQty = markedForRemoval.get(wine.id) || 1;
+                    const value = parseFloat(wine.valuation || 0) * pullQty;
+                    totalBottles += pullQty;
+                    totalValue += value;
+
+                    return `
+                        <div class="location-group">
+                            <div class="location-header">
+                                <span class="location-name">${location}</span>
+                                <div class="qty-controls qty-sm">
+                                    <button class="qty-btn" data-wine-id="${wine.id}" data-delta="-1" ${pullQty <= 1 ? 'disabled' : ''}>−</button>
+                                    <span class="qty-display">${pullQty}</span>
+                                    <button class="qty-btn" data-wine-id="${wine.id}" data-delta="1" ${pullQty >= maxQty ? 'disabled' : ''}>+</button>
+                                </div>
+                                <button class="pull-wine-remove" data-wine-id="${wine.id}">×</button>
+                            </div>
+                            <div class="pull-wine-card">
+                                <div class="wine-vintage-badge ${getColorClass(wine)}" style="width:36px;height:36px;font-size:11px;">${formatVintage(wine.vintage)}</div>
+                                <div class="pull-wine-info">
+                                    <div class="pull-wine-name">${wine.wine_name || 'Unknown Wine'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }).join('');
+
+            document.getElementById('pullTotalBottles').textContent = totalBottles;
+            document.getElementById('pullTotalValue').textContent = formatValue(totalValue);
+        }
+
+        function copyPullList() {
+            if (!wineData || markedForRemoval.size === 0) return;
+
+            const markedWines = wineData.wines.filter(w => markedForRemoval.has(w.id));
+
+            const byLocation = {};
+            markedWines.forEach(wine => {
+                const loc = wine.location || 'Unknown';
+                const bin = wine.bin || '';
+                const key = bin ? `${loc} / ${bin}` : loc;
+                if (!byLocation[key]) byLocation[key] = [];
+                byLocation[key].push(wine);
+            });
+
+            let totalBottles = 0;
+            let totalValue = 0;
+
+            const lines = ['Wines to Pull from Cellar', '═'.repeat(40), ''];
+
+            Object.keys(byLocation).sort().forEach(location => {
+                lines.push(`📍 ${location}`);
+                lines.push('─'.repeat(40));
+                byLocation[location].forEach(wine => {
+                    const pullQty = markedForRemoval.get(wine.id) || 1;
+                    const value = parseFloat(wine.valuation || 0) * pullQty;
+                    totalBottles += pullQty;
+                    totalValue += value;
+                    lines.push(`  ${formatVintage(wine.vintage)} ${wine.wine_name}`);
+                    lines.push(`     ${wine.producer || ''} · ${pullQty} bottle${pullQty > 1 ? 's' : ''}`);
+                });
+                lines.push('');
+            });
+
+            lines.push('═'.repeat(40));
+            lines.push(`Total: ${totalBottles} bottles${demoMode ? '' : ' · ' + formatValue(totalValue)}`);
+
+            navigator.clipboard.writeText(lines.join('\n')).then(() => {
+                const btn = document.getElementById('pullCopy');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+
+        // Sheet Management
+        function openFilterSheet() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('filterOverlay').classList.add('active');
+            document.getElementById('filterSheet').classList.add('active');
+        }
+
+        function closeFilterSheet() {
+            document.body.style.overflow = '';
+            const sheet = document.getElementById('filterSheet');
+            sheet.style.transform = '';
+            document.getElementById('filterOverlay').classList.remove('active');
+            sheet.classList.remove('active');
+        }
+
+        function openPullSheet() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('filterOverlay').classList.add('active');
+            document.getElementById('pullSheet').classList.add('active');
+        }
+
+        function closePullSheet() {
+            document.body.style.overflow = '';
+            const sheet = document.getElementById('pullSheet');
+            sheet.style.transform = '';
+            document.getElementById('filterOverlay').classList.remove('active');
+            sheet.classList.remove('active');
+        }
+
+        function openSortSheet() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('filterOverlay').classList.add('active');
+            document.getElementById('sortSheet').classList.add('active');
+            updateSortOptions();
+        }
+
+        function closeSortSheet() {
+            document.body.style.overflow = '';
+            const sheet = document.getElementById('sortSheet');
+            sheet.style.transform = '';
+            document.getElementById('filterOverlay').classList.remove('active');
+            sheet.classList.remove('active');
+        }
+
+        // Generic swipe-down-to-close for sheets
+        function setupSheetSwipe(sheetId, closeFn) {
+            const sheet = document.getElementById(sheetId);
+            const header = sheet.querySelector('.sheet-header');
+            if (!header) return;
+
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            // Listen on the header area (larger touch target)
+            header.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                currentY = startY;
+                isDragging = true;
+                sheet.style.transition = 'none';
+            }, { passive: false });
+
+            header.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+
+                if (deltaY > 0) {
+                    e.preventDefault(); // Prevent browser pull-to-refresh
+                    sheet.style.transform = `translateY(${deltaY}px)`;
+                    const opacity = Math.max(0, 1 - (deltaY / 300));
+                    document.getElementById('filterOverlay').style.opacity = opacity;
+                }
+            }, { passive: false });
+
+            header.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+
+                const deltaY = currentY - startY;
+                sheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                document.getElementById('filterOverlay').style.transition = 'opacity 0.3s';
+
+                if (deltaY > 100) {
+                    closeFn();
+                } else {
+                    sheet.style.transform = 'translateY(0)';
+                    document.getElementById('filterOverlay').style.opacity = '1';
+                }
+
+                setTimeout(() => {
+                    sheet.style.transition = '';
+                    document.getElementById('filterOverlay').style.transition = '';
+                    document.getElementById('filterOverlay').style.opacity = '';
+                }, 300);
+            });
+        }
+
+        function updateSortOptions() {
+            // Update sort field selection
+            document.querySelectorAll('.sort-option').forEach(opt => {
+                const isSelected = opt.dataset.sort === sortConfig.key;
+                opt.classList.toggle('selected', isSelected);
+            });
+            // Update direction toggle
+            const ascBtn = document.getElementById('sortAsc');
+            const descBtn = document.getElementById('sortDesc');
+            if (ascBtn && descBtn) {
+                ascBtn.classList.toggle('active', sortConfig.direction === 'asc');
+                descBtn.classList.toggle('active', sortConfig.direction === 'desc');
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Search
+            document.getElementById('searchInput').addEventListener('input', debounce(e => {
+                activeFilters.search = e.target.value;
+                applyFilters();
+            }, 300));
+
+            // Navigation
+            document.getElementById('navHome').addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            document.getElementById('navFilter').addEventListener('click', openFilterSheet);
+            document.getElementById('navPull').addEventListener('click', openPullSheet);
+
+            // Filter Sheet
+            document.getElementById('filterClose').addEventListener('click', closeFilterSheet);
+            document.getElementById('filterApply').addEventListener('click', closeFilterSheet);
+            document.getElementById('filterClearAll').addEventListener('click', () => {
+                clearAllFilters();
+                closeFilterSheet();
+            });
+            document.getElementById('filterOverlay').addEventListener('click', () => {
+                closeFilterSheet();
+                closePullSheet();
+                closeSortSheet();
+                closeModal();
+            });
+
+            // Pull Sheet
+            document.getElementById('pullClose').addEventListener('click', closePullSheet);
+            document.getElementById('pullClear').addEventListener('click', () => {
+                markedForRemoval.clear();
+                saveMarkedWines();
+                updateMarkedWinesUI();
+                renderWines();
+            });
+            document.getElementById('pullCopy').addEventListener('click', copyPullList);
+
+            // Sort
+            document.getElementById('sortBtn').addEventListener('click', openSortSheet);
+            document.getElementById('sortClose').addEventListener('click', closeSortSheet);
+            document.getElementById('sortAsc').addEventListener('click', () => {
+                sortConfig.direction = 'asc';
+                updateSortOptions();
+                if (sortConfig.key) renderWines();
+            });
+            document.getElementById('sortDesc').addEventListener('click', () => {
+                sortConfig.direction = 'desc';
+                updateSortOptions();
+                if (sortConfig.key) renderWines();
+            });
+
+            // Chart buttons
+            document.getElementById('locationBack').addEventListener('click', drillBack);
+            document.getElementById('locationClear').addEventListener('click', () => {
+                activeFilters.country = null;
+                activeFilters.region = null;
+                activeFilters.producer = null;
+                locationDrillLevel = 'country';
+                selectedCountry = null;
+                selectedRegion = null;
+                applyFilters();
+            });
+            document.getElementById('drinkClear').addEventListener('click', () => {
+                clearFilter('drinkWindow');
+                clearFilter('wineType');
+            });
+            document.getElementById('vintageClear').addEventListener('click', () => clearFilter('vintage'));
+            document.getElementById('varietalClear').addEventListener('click', () => clearFilter('varietal'));
+
+            // Expand buttons
+            document.getElementById('locationExpand').addEventListener('click', () => toggleExpand('location'));
+            document.getElementById('vintageExpand').addEventListener('click', () => toggleExpand('vintage'));
+            document.getElementById('varietalExpand').addEventListener('click', () => toggleExpand('varietal'));
+
+            // Load more
+            document.getElementById('loadMoreBtn').addEventListener('click', () => {
+                displayedCount += 20;
+                renderWines();
+            });
+
+            // Modal
+            document.getElementById('modalOverlay').addEventListener('click', closeModal);
+            document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+            document.getElementById('modalPullBtn').addEventListener('click', () => {
+                if (currentModalWine) {
+                    toggleMarkWine(currentModalWine.id);
+                }
+            });
+
+            // Global click handlers
+            document.addEventListener('click', e => {
+                // Bar items
+                const barItem = e.target.closest('.bar-item');
+                if (barItem) {
+                    const action = barItem.dataset.action;
+                    const value = barItem.dataset.value;
+                    const filter = barItem.dataset.filter;
+
+                    if (action === 'drillCountry') {
+                        drillIntoCountry(value);
+                    } else if (action === 'drillRegion') {
+                        drillIntoRegion(value);
+                    } else if (action || filter) {
+                        // Handle vintage, varietal, producer, drinkWindow, etc.
+                        setFilter(action || filter, value);
+                    }
+                    return;
+                }
+
+                // Wine type icons
+                const wineTypeItem = e.target.closest('.wine-type-item');
+                if (wineTypeItem) {
+                    setFilter(wineTypeItem.dataset.filter, wineTypeItem.dataset.value);
+                    return;
+                }
+
+                // Filter options
+                const filterOption = e.target.closest('.filter-option');
+                if (filterOption && !filterOption.classList.contains('disabled')) {
+                    setFilter(filterOption.dataset.filter, filterOption.dataset.value);
+                    return;
+                }
+
+                // Filter clear buttons
+                const filterClearBtn = e.target.closest('.filter-clear-btn');
+                if (filterClearBtn) {
+                    clearFilter(filterClearBtn.dataset.filter);
+                    return;
+                }
+
+                // Filter pill close
+                const pillClose = e.target.closest('.filter-pill button');
+                if (pillClose) {
+                    clearFilter(pillClose.dataset.filter);
+                    return;
+                }
+
+                // Sort options
+                const sortOption = e.target.closest('.sort-option');
+                if (sortOption) {
+                    sortConfig.key = sortOption.dataset.sort;
+                    // Direction comes from the toggle, not the option
+                    updateSortOptions();
+                    renderWines();
+                    // Don't auto-close - user will swipe down when done
+                    return;
+                }
+
+                // Pull quantity buttons
+                const qtyBtn = e.target.closest('.qty-btn');
+                if (qtyBtn) {
+                    adjustPullQuantity(qtyBtn.dataset.wineId, parseInt(qtyBtn.dataset.delta));
+                    return;
+                }
+
+                // Pull remove buttons
+                const removeBtn = e.target.closest('.pull-wine-remove');
+                if (removeBtn) {
+                    toggleMarkWine(removeBtn.dataset.wineId);
+                    return;
+                }
+
+                // Pull checkbox on wine cards (must be before wine-card handler)
+                const pullCheckbox = e.target.closest('.pull-checkbox');
+                if (pullCheckbox && pullCheckbox.dataset.wineId) {
+                    toggleMarkWine(pullCheckbox.dataset.wineId);
+                    return;
+                }
+
+                // Wine cards (opens detail modal)
+                const wineCard = e.target.closest('.wine-card');
+                if (wineCard) {
+                    showWineDetail(wineCard.dataset.id);
+                    return;
+                }
+            });
+
+            // Keyboard
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    closeFilterSheet();
+                    closePullSheet();
+                    closeSortSheet();
+                    closeModal();
+                }
+            });
+        }
+
+        function debounce(fn, wait) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn(...args), wait);
+            };
+        }
+
+        // Mini Charts Bar - appears when charts scroll off screen
+        function setupChartsMiniBar() {
+            const chartsSection = document.querySelector('.charts-section');
+            const miniBar = document.getElementById('chartsMiniBar');
+
+            if (!chartsSection || !miniBar) return;
+
+            // Intersection Observer to detect when charts leave viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Show mini bar when charts are NOT visible (or barely visible)
+                    if (entry.intersectionRatio < 0.3) {
+                        miniBar.classList.add('visible');
+                    } else {
+                        miniBar.classList.remove('visible');
+                    }
+                });
+            }, {
+                threshold: [0, 0.3, 1],
+                rootMargin: '-60px 0px 0px 0px' // Account for fixed header
+            });
+
+            observer.observe(chartsSection);
+
+            // Chart ID mapping
+            const chartIds = {
+                location: 'locationChart',
+                drink: 'drinkChart',
+                vintage: 'vintageChart',
+                varietal: 'varietalChart'
+            };
+
+            // Helper to scroll page to top
+            function scrollToTop() {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                window.scrollTo(0, 0);
+            }
+
+            // Click on specific icon scrolls to top AND shows that chart
+            miniBar.querySelectorAll('.mini-chart-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const chartType = icon.dataset.chart;
+                    const chartId = chartIds[chartType];
+                    const chartEl = document.getElementById(chartId);
+                    const chartsScroll = document.getElementById('chartsScroll');
+
+                    // Scroll page to top first
+                    scrollToTop();
+
+                    // Scroll carousel horizontally to show the specific chart
+                    if (chartEl && chartsScroll) {
+                        setTimeout(() => {
+                            const scrollLeft = chartEl.offsetLeft - 16; // Account for padding
+                            chartsScroll.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                        }, 100);
+                    }
+                });
+            });
+
+            // Click on label/chevron area scrolls to top
+            miniBar.addEventListener('click', (e) => {
+                if (!e.target.closest('.mini-chart-icon')) {
+                    scrollToTop();
+                }
+            });
+
+            // Update mini bar icons to show active filters
+            window.updateMiniBarFilters = function() {
+                const icons = miniBar.querySelectorAll('.mini-chart-icon');
+                icons.forEach(icon => {
+                    const chart = icon.dataset.chart;
+                    let hasFilter = false;
+
+                    if (chart === 'location') {
+                        hasFilter = activeFilters.country || activeFilters.region || activeFilters.producer;
+                    } else if (chart === 'drink') {
+                        hasFilter = activeFilters.drinkWindow || activeFilters.wineType;
+                    } else if (chart === 'vintage') {
+                        hasFilter = activeFilters.vintage;
+                    } else if (chart === 'varietal') {
+                        hasFilter = activeFilters.varietal;
+                    }
+
+                    icon.classList.toggle('has-filter', hasFilter);
+                });
+            };
+        }
+
+        // Initialize
+        loadWineData();
+        setupModalSwipe();
+        setupSheetSwipe('filterSheet', closeFilterSheet);
+        setupSheetSwipe('pullSheet', closePullSheet);
+        setupSheetSwipe('sortSheet', closeSortSheet);
+        setupChartsMiniBar();
+    </script>
+</body>
+</html>

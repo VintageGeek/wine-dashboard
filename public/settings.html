@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container, .settings-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1d1d1f;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #86868b;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d1d6;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0077ED;
+        }
+
+        .error {
+            color: #ff3b30;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .settings-container {
+            display: none;
+        }
+
+        .settings-container.show {
+            display: block;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e5e7;
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-info h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 4px;
+        }
+
+        .toggle-info p {
+            font-size: 13px;
+            color: #86868b;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 51px;
+            height: 31px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e5e7;
+            transition: 0.3s;
+            border-radius: 31px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 27px;
+            width: 27px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #34c759;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: rgba(52,199,89,0.1);
+            color: #1a7f37;
+        }
+
+        .status.error {
+            display: block;
+            background: rgba(255,59,48,0.1);
+            color: #c22d25;
+        }
+
+        .logout-btn {
+            margin-top: 24px;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .logout-btn:hover {
+            background: #e5e5e7;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <!-- Auth Form -->
+    <div class="auth-container" id="authContainer">
+        <h1>Settings Login</h1>
+        <form id="authForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit">Login</button>
+            <div class="error" id="authError">Invalid username or password</div>
+        </form>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-container" id="settingsContainer">
+        <h1>Dashboard Settings</h1>
+
+        <div class="toggle-row">
+            <div class="toggle-info">
+                <h3>Demo Mode</h3>
+                <p>Hide all dollar amounts and valuations</p>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="demoModeToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="status" id="statusMessage"></div>
+
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <script>
+        // Simple auth - replace with your credentials
+        const validUser = '[USERNAME_HERE]';
+        const validPass = '[PASSWORD_HERE]';
+
+        // Firebase
+        const firebaseConfig = {
+            databaseURL: "https://wine-explorer-puller-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Elements
+        const authContainer = document.getElementById('authContainer');
+        const settingsContainer = document.getElementById('settingsContainer');
+        const authForm = document.getElementById('authForm');
+        const authError = document.getElementById('authError');
+        const demoModeToggle = document.getElementById('demoModeToggle');
+        const statusMessage = document.getElementById('statusMessage');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Check session
+        function checkSession() {
+            const session = sessionStorage.getItem('settingsAuth');
+            if (session === 'authenticated') {
+                showSettings();
+            }
+        }
+
+        // Auth
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (user === validUser && pass === validPass) {
+                sessionStorage.setItem('settingsAuth', 'authenticated');
+                authError.classList.remove('show');
+                showSettings();
+            } else {
+                authError.classList.add('show');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('settingsAuth');
+            settingsContainer.classList.remove('show');
+            authContainer.style.display = 'block';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        // Show settings
+        function showSettings() {
+            authContainer.style.display = 'none';
+            settingsContainer.classList.add('show');
+            loadSettings();
+        }
+
+        // Load settings from Firebase
+        async function loadSettings() {
+            try {
+                const snapshot = await database.ref('settings').once('value');
+                const settings = snapshot.val() || {};
+                demoModeToggle.checked = settings.demoMode || false;
+            } catch (err) {
+                showStatus('Failed to load settings', 'error');
+            }
+        }
+
+        // Save demo mode
+        demoModeToggle.addEventListener('change', async () => {
+            try {
+                await database.ref('settings/demoMode').set(demoModeToggle.checked);
+                showStatus('Settings saved successfully', 'success');
+            } catch (err) {
+                showStatus('Failed to save settings', 'error');
+            }
+        });
+
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status ' + type;
+            setTimeout(() => {
+                statusMessage.className = 'status';
+            }, 3000);
+        }
+
+        // Init
+        checkSession();
+    </script>
+</body>
+</html>
