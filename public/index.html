@@ -1926,6 +1926,7 @@
             drinkWindow: null,
             wineType: null,
             overcapacity: null,
+            noLocation: null,
             search: ''
         };
         let sortConfig = { key: null, direction: 'asc' };
@@ -2012,6 +2013,16 @@
             }
             applyFilters();
             updateOvercapacityBanner();
+        }
+
+        function toggleNoLocationFilter() {
+            if (activeFilters.noLocation) {
+                activeFilters.noLocation = null;
+            } else {
+                activeFilters.noLocation = true;
+            }
+            applyFilters();
+            buildFilterPanel(); // Refresh to update selected state
         }
 
         async function initializeApp() {
@@ -2496,6 +2507,12 @@
 
         // Filter Panel
         function buildFilterPanel() {
+            // Count wines with no location
+            const noLocationCount = wineData.wines.filter(w => {
+                const loc = wineLocations.get(w.id);
+                return !loc || !loc.location || loc.location === 'none';
+            }).length;
+
             const filterConfigs = [
                 { key: 'country', label: 'Country', getter: w => w.country },
                 { key: 'region', label: 'Region', getter: w => w.region },
@@ -2505,7 +2522,24 @@
             ];
 
             const body = document.getElementById('filterPanelBody');
-            body.innerHTML = filterConfigs.map(config => {
+
+            // Quick filters section
+            const quickFiltersHtml = `
+                <div class="filter-group">
+                    <div class="filter-group-header">
+                        <h4>Quick Filters</h4>
+                    </div>
+                    <div class="filter-options">
+                        <div class="filter-option ${activeFilters.noLocation ? 'selected' : ''} ${noLocationCount === 0 ? 'disabled' : ''}"
+                             onclick="toggleNoLocationFilter()" style="cursor: pointer;">
+                            <span>No Location</span>
+                            <span class="filter-option-count">${noLocationCount}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            body.innerHTML = quickFiltersHtml + filterConfigs.map(config => {
                 const options = getFilterOptions(config.key, config.getter, config.sort);
                 return `
                     <div class="filter-group ${activeFilters[config.key] ? 'has-selection' : ''}" data-filter="${config.key}">
@@ -2582,6 +2616,10 @@
             }
             if (filters.overcapacity) {
                 if (!binWarnings.has(wine.id)) return false;
+            }
+            if (filters.noLocation) {
+                const loc = wineLocations.get(wine.id);
+                if (loc && loc.location && loc.location !== 'none') return false;
             }
             return true;
         }
