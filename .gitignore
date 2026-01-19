@@ -1,5 +1,7 @@
 # Data files (contains personal wine collection)
 data/
+public/wine_collection.json
+public/pull_list.json
 
 # Dependencies
 node_modules/
@@ -7,7 +9,6 @@ node_modules/
 # Firebase
 .firebase/
 firebase-debug.log
-.firebaserc
 
 # OS files
 .DS_Store

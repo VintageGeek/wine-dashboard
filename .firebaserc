@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "wine-explorer-puller"
+  },
+  "targets": {
+    "wine-explorer-puller": {
+      "hosting": {
+        "prod": [
+          "wine-explorer-puller"
+        ],
+        "dev": [
+          "wine-explorer-puller-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

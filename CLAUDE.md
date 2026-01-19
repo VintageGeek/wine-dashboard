@@ -34,7 +34,15 @@ wine-dashboard/
 powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboard'; python scripts/server.py"
 # Serves at http://localhost:8080
 
-# Deploy to Firebase (USE THIS EXACT COMMAND)
+# Deploy to DEV (test changes here first)
+powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboard'; npx firebase-tools deploy --only hosting:dev"
+# URL: https://wine-explorer-puller-dev.web.app
+
+# Deploy to PROD (after validating on dev)
+powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboard'; npx firebase-tools deploy --only hosting:prod"
+# URL: https://wine-explorer-puller.web.app
+
+# Deploy to BOTH (use sparingly)
 powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboard'; npx firebase-tools deploy"
 ```
 
@@ -70,7 +78,10 @@ powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboar
 ### Firebase
 - Project: `wine-explorer-puller`
 - Database: `https://wine-explorer-puller-default-rtdb.firebaseio.com`
-- Hosting: Serves from `public/` directory
+- Hosting (multi-site):
+  - **prod**: https://wine-explorer-puller.web.app
+  - **dev**: https://wine-explorer-puller-dev.web.app
+- Both sites serve from `public/` and share the same database
 
 ## Key Concepts
 
