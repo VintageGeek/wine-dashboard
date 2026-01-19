@@ -686,6 +686,95 @@
             font-weight: 600;
         }
 
+        /* Bin Validation Warning */
+        .wine-row.has-warning {
+            background: rgba(255, 149, 0, 0.06);
+        }
+
+        .wine-row.has-warning:hover {
+            background: rgba(255, 149, 0, 0.10);
+        }
+
+        .bin-warning {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: #ff9500;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 6px;
+            cursor: help;
+            flex-shrink: 0;
+        }
+
+        .bin-warning:hover {
+            background: #e88600;
+        }
+
+        /* Overcapacity Banner */
+        .overcapacity-banner {
+            display: none;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 1px solid #ffb74d;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .overcapacity-banner.visible {
+            display: flex;
+        }
+
+        .overcapacity-banner:hover {
+            background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255,152,0,0.2);
+        }
+
+        .overcapacity-banner.active {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            border-color: #e65100;
+        }
+
+        .overcapacity-banner.active .overcapacity-icon,
+        .overcapacity-banner.active .overcapacity-text,
+        .overcapacity-banner.active .overcapacity-count {
+            color: white;
+        }
+
+        .overcapacity-icon {
+            font-size: 20px;
+            color: #e65100;
+        }
+
+        .overcapacity-text {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e65100;
+        }
+
+        .overcapacity-count {
+            background: #ff9800;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .overcapacity-banner.active .overcapacity-count {
+            background: rgba(255,255,255,0.3);
+        }
+
         /* Pull Selection Checkbox */
         .pull-checkbox {
             width: 22px;
@@ -1615,6 +1704,13 @@
             </div>
         </div>
 
+        <!-- Overcapacity Warning Banner -->
+        <div class="overcapacity-banner" id="overcapacityBanner">
+            <span class="overcapacity-icon">⚠️</span>
+            <span class="overcapacity-text">Some bins are over capacity</span>
+            <span class="overcapacity-count" id="overcapacityCount">0 wines</span>
+        </div>
+
         <!-- Active Filters -->
         <div class="active-filters" id="activeFilters"></div>
 
@@ -1638,6 +1734,7 @@
                     <div class="col" data-sort="varietal">Varietal <span class="sort-arrow">↑</span></div>
                     <div class="col" data-sort="region">Region <span class="sort-arrow">↑</span></div>
                     <div class="col" data-sort="country">Country <span class="sort-arrow">↑</span></div>
+                    <div class="col" data-sort="bin">Bin <span class="sort-arrow">↑</span></div>
                     <div class="col" data-sort="drink_date_min">From <span class="sort-arrow">↑</span></div>
                     <div class="col" data-sort="drink_date_max">To <span class="sort-arrow">↑</span></div>
                     <div class="col" data-sort="quantity">Qty <span class="sort-arrow">↑</span></div>
@@ -1708,9 +1805,115 @@
     </div>
 
     <script>
+        // Grid shelving capacities (A-J columns, rows 1-19)
+        const GRID_CAPACITIES = {
+            A: 6, B: 6, C: 6, D: 4, E: 2,
+            F: 6, G: 6, H: 6, I: 4, J: 2
+        };
+        const OVERFLOW_BOX_CAPACITY = 12;
+        // Storage with no capacity limit (collections of multiple containers)
+        const NO_LIMIT_STORAGE = ['yellow box'];
+
+        // Check if bin is grid shelving (pattern: [A-J][1-19])
+        function isGridBin(bin) {
+            if (!bin || bin.length < 2) return false;
+            const match = bin.match(/^([A-Ja-j])(\d+)$/);
+            if (!match) return false;
+            const row = parseInt(match[2], 10);
+            return row >= 1 && row <= 19;
+        }
+
+        // Get bin capacity - grid bins use column rules, no-limit storage, overflow boxes max 12
+        function getBinCapacity(bin) {
+            if (!bin) return OVERFLOW_BOX_CAPACITY;
+            if (NO_LIMIT_STORAGE.includes(bin.toLowerCase())) return 999;
+            if (isGridBin(bin)) {
+                const column = bin.charAt(0).toUpperCase();
+                return GRID_CAPACITIES[column] || 6;
+            }
+            return OVERFLOW_BOX_CAPACITY;
+        }
+
+        // Natural sort for bins: A1, A2, A9, A10, A11, B1, etc.
+        function naturalBinSort(a, b) {
+            const parseB = (bin) => {
+                const match = bin.match(/^([A-Za-z]*)(\d*)$/);
+                if (!match) return [bin, 0];
+                return [match[1].toUpperCase(), parseInt(match[2]) || 0];
+            };
+            const [aLetter, aNum] = parseB(a.bin);
+            const [bLetter, bNum] = parseB(b.bin);
+            if (aLetter !== bLetter) return aLetter.localeCompare(bLetter);
+            return aNum - bNum;
+        }
+
+        // Calculate wine locations from bottle-level data
+        // Stores ALL bins per wine for multi-bin handling
+        function calculateWineLocations(bottles) {
+            const allBins = new Map(); // wine_id -> [{location, bin, count}]
+
+            // Count bottles per wine per bin
+            bottles.forEach(b => {
+                if (b.wine_id && b.location && b.bin) {
+                    if (!allBins.has(b.wine_id)) allBins.set(b.wine_id, new Map());
+                    const wineBins = allBins.get(b.wine_id);
+                    const key = `${b.location}:${b.bin}`;
+                    const existing = wineBins.get(key);
+                    if (existing) {
+                        existing.count++;
+                    } else {
+                        wineBins.set(key, { location: b.location, bin: b.bin, count: 1 });
+                    }
+                }
+            });
+
+            // Convert to sorted array per wine, pick display value
+            const locations = new Map();
+            allBins.forEach((wineBins, wineId) => {
+                const bins = Array.from(wineBins.values()).sort(naturalBinSort);
+                const firstBin = bins[0];
+                locations.set(wineId, {
+                    location: firstBin.location,
+                    bin: bins.length > 1 ? 'Multiple' : firstBin.bin,
+                    firstBin: firstBin, // For pull list - always the first alphabetically
+                    allBins: bins       // All bins with counts
+                });
+            });
+            return locations;
+        }
+
+        // Calculate wines in overcapacity bins from bottle-level data
+        function calculateBinWarningsFromBottles(bottles) {
+            const binCounts = {};
+            // Count bottles per bin (using location:bin as key)
+            bottles.forEach(b => {
+                if (b.location && b.bin) {
+                    const key = `${b.location}:${b.bin}`;
+                    if (!binCounts[key]) {
+                        binCounts[key] = { count: 0, capacity: getBinCapacity(b.bin), wines: new Set() };
+                    }
+                    binCounts[key].count += 1;
+                    binCounts[key].wines.add(b.wine_id);
+                }
+            });
+
+            // Find wines in overcapacity bins
+            const warnings = new Map();
+            Object.entries(binCounts).forEach(([key, data]) => {
+                if (data.count > data.capacity) {
+                    const [loc, bin] = key.split(':');
+                    const msg = `${bin} has ${data.count}/${data.capacity} bottles`;
+                    data.wines.forEach(id => warnings.set(id, msg));
+                }
+            });
+            return warnings;
+        }
+
         // State
         let wineData = null;
         let filteredWines = [];
+        let binWarnings = new Map();
+        let wineLocations = new Map(); // wine_id -> {location, bin} or {location, bin: 'Multiple'}
         let locationDrillLevel = 'country';
         let selectedCountry = null;
         let selectedRegion = null;
@@ -1722,6 +1925,7 @@
             vintage: null,
             drinkWindow: null,
             wineType: null,
+            overcapacity: null,
             search: ''
         };
         let sortConfig = { key: null, direction: 'asc' };
@@ -1752,16 +1956,20 @@
         // Load data from Supabase
         async function loadWineData() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('v_wines_full')
-                    .select('*')
-                    .gt('quantity', 0);
+                // Fetch wines and bottles in parallel
+                const [winesResult, bottlesResult] = await Promise.all([
+                    supabaseClient.from('v_wines_full').select('*').gt('quantity', 0),
+                    supabaseClient.from('bottles').select('wine_id, location, bin').eq('bottle_state', 1)
+                ]);
 
-                if (error) throw error;
-                if (!data || data.length === 0) throw new Error('No wines found');
+                if (winesResult.error) throw winesResult.error;
+                if (!winesResult.data || winesResult.data.length === 0) throw new Error('No wines found');
 
-                wineData = { wines: data };
-                filteredWines = [...data];
+                wineData = { wines: winesResult.data };
+                const bottles = bottlesResult.data || [];
+                binWarnings = calculateBinWarningsFromBottles(bottles);
+                wineLocations = calculateWineLocations(bottles);
+                filteredWines = [...winesResult.data];
                 initializeApp();
             } catch (error) {
                 console.error('Load error:', error);
@@ -1774,6 +1982,38 @@
             }
         }
 
+        // Update overcapacity banner
+        function updateOvercapacityBanner() {
+            const banner = document.getElementById('overcapacityBanner');
+            const countEl = document.getElementById('overcapacityCount');
+            const winesInOvercapacity = wineData?.wines?.filter(w => binWarnings.has(w.id)) || [];
+
+            if (winesInOvercapacity.length > 0) {
+                banner.classList.add('visible');
+                countEl.textContent = `${winesInOvercapacity.length} wine${winesInOvercapacity.length > 1 ? 's' : ''}`;
+
+                // Update active state
+                if (activeFilters.overcapacity) {
+                    banner.classList.add('active');
+                } else {
+                    banner.classList.remove('active');
+                }
+            } else {
+                banner.classList.remove('visible');
+            }
+        }
+
+        // Toggle overcapacity filter
+        function toggleOvercapacityFilter() {
+            if (activeFilters.overcapacity) {
+                activeFilters.overcapacity = null;
+            } else {
+                activeFilters.overcapacity = true;
+            }
+            applyFilters();
+            updateOvercapacityBanner();
+        }
+
         async function initializeApp() {
             try {
                 await loadMarkedWines();
@@ -1784,6 +2024,10 @@
                 buildFilterPanel();
                 setupEventListeners();
                 updateMarkedWinesUI();
+                updateOvercapacityBanner();
+
+                // Overcapacity banner click handler
+                document.getElementById('overcapacityBanner').addEventListener('click', toggleOvercapacityFilter);
             } catch (error) {
                 console.error('Init error:', error);
                 document.getElementById('wineRows').innerHTML = `
@@ -2198,8 +2442,9 @@
                 const isMarked = markedForRemoval.has(wine.id);
                 const pullQty = markedForRemoval.get(wine.id) || 0;
                 const totalQty = parseInt(wine.quantity || 1);
+                const warning = binWarnings.get(wine.id);
                 return `
-                    <div class="wine-row ${isMarked ? 'marked' : ''}" data-id="${wine.id}">
+                    <div class="wine-row ${isMarked ? 'marked' : ''} ${warning ? 'has-warning' : ''}" data-id="${wine.id}">
                         <div class="pull-checkbox ${isMarked ? 'checked' : ''}" data-wine-id="${wine.id}" title="${isMarked ? 'Remove from pull list' : 'Add to pull list'}">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
                                 <path d="M20 6L9 17l-5-5"/>
@@ -2213,9 +2458,10 @@
                         <div class="wine-cell">${wine.varietal || '-'}</div>
                         <div class="wine-cell">${wine.region || '-'}</div>
                         <div class="wine-cell">${wine.country || '-'}</div>
+                        <div class="wine-cell">${wineLocations.get(wine.id)?.bin || '-'}</div>
                         <div class="wine-cell">${wine.drink_date_min || '-'}</div>
                         <div class="wine-cell">${wine.drink_date_max || '-'}</div>
-                        <div class="wine-cell primary">${isMarked ? `<span class="pull-qty">${pullQty}/</span>` : ''}${totalQty}</div>
+                        <div class="wine-cell primary">${isMarked ? `<span class="pull-qty">${pullQty}/</span>` : ''}${totalQty}${warning ? `<span class="bin-warning" title="${warning}">!</span>` : ''}</div>
                         <div class="wine-cell">${formatValue(parseFloat(wine.valuation || 0))}</div>
                     </div>
                 `;
@@ -2334,6 +2580,9 @@
                 const wineType = getWineType(wine);
                 if (wineType !== filters.wineType) return false;
             }
+            if (filters.overcapacity) {
+                if (!binWarnings.has(wine.id)) return false;
+            }
             return true;
         }
 
@@ -2422,6 +2671,7 @@
             selectedCountry = null;
             selectedRegion = null;
             applyFilters();
+            updateOvercapacityBanner();
         }
 
         // Drill into country
@@ -2505,7 +2755,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="label">Location</div>
-                            <div class="value">${wine.location || '-'} ${wine.bin || ''}</div>
+                            <div class="value">${wineLocations.get(wine.id)?.location || '-'} ${wineLocations.get(wine.id)?.bin || ''}</div>
                         </div>
                         <div class="detail-item">
                             <div class="label">Value</div>
@@ -2820,11 +3070,12 @@
             let totalBottles = 0;
             let totalValue = 0;
 
-            // Group wines by location/bin
+            // Group wines by location/bin (using first bin from bottles data)
             const byLocation = {};
             markedWines.forEach(wine => {
-                const loc = wine.location || 'Unknown Location';
-                const bin = wine.bin || '';
+                const locData = wineLocations.get(wine.id)?.firstBin;
+                const loc = locData?.location || 'Unknown Location';
+                const bin = locData?.bin || '';
                 const key = bin ? `${loc} / ${bin}` : loc;
                 if (!byLocation[key]) byLocation[key] = [];
                 byLocation[key].push(wine);
@@ -2847,7 +3098,8 @@
                 const wines = byLocation[location];
 
                 return wines.map(wine => {
-                    const maxQty = parseInt(wine.quantity || 1);
+                    const binCount = wineLocations.get(wine.id)?.firstBin?.count || 1;
+                    const maxQty = Math.min(binCount, parseInt(wine.quantity || 1));
                     const pullQty = markedForRemoval.get(wine.id) || 1;
                     const value = parseFloat(wine.valuation || 0) * pullQty;
                     totalBottles += pullQty;
@@ -2899,11 +3151,12 @@
 
             const markedWines = wineData.wines.filter(w => markedForRemoval.has(w.id));
 
-            // Group by location for the copy
+            // Group by location for the copy (using first bin from bottles data)
             const byLocation = {};
             markedWines.forEach(wine => {
-                const loc = wine.location || 'Unknown';
-                const bin = wine.bin || '';
+                const locData = wineLocations.get(wine.id)?.firstBin;
+                const loc = locData?.location || 'Unknown';
+                const bin = locData?.bin || '';
                 const key = bin ? `${loc} / ${bin}` : loc;
                 if (!byLocation[key]) byLocation[key] = [];
                 byLocation[key].push(wine);
@@ -2944,12 +3197,6 @@
         async function checkAuthAndInit() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = 'login.html?redirect=index.html';
-                return;
-            }
-            // Check MFA level
-            const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
-            if (aalData.currentLevel !== 'aal2') {
                 window.location.href = 'login.html?redirect=index.html';
                 return;
             }

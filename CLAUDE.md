@@ -6,6 +6,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Wine Collection Dashboard - an interactive web application for managing a wine cellar with 425+ wines. Deployed on Firebase Hosting with Firebase Realtime Database for state sync.
 
+---
+
+## Data Layer Integration
+
+> **IMPORTANT:** The backend is migrating from Firebase/static JSON to Supabase.
+
+**Data Layer Project:** `C:\Users\mikep\Desktop\wine-data-layer`
+
+**Before modifying any of the following, read the interface contract:**
+```
+C:\Users\mikep\Desktop\wine-data-layer\docs\DASHBOARD_INTEGRATION.md
+```
+
+This applies to:
+- Wine data fetching (`fetch('/wine_collection.json')`)
+- Pull list sync (Firebase RTDB)
+- Settings/demo mode (Firebase RTDB)
+- Real-time subscriptions
+
+**Key documents in data layer:**
+| File | Purpose |
+|------|---------|
+| `docs/DASHBOARD_INTEGRATION.md` | API contract, migration checklist |
+| `docs/DATA_MODEL.md` | Database schema |
+| `docs/GOTCHAS.md` | Edge cases to handle |
+| `PROGRESS.md` | Migration status |
+
+---
+
 ## Folder Structure
 
 ```
@@ -46,7 +75,15 @@ powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboar
 powershell -ExecutionPolicy Bypass -Command "cd 'C:\Users\mikep\Desktop\dashboard'; npx firebase-tools deploy"
 ```
 
+### Deployment Workflow (CRITICAL)
+1. **ALWAYS deploy to dev first** - never go straight to prod
+2. **Ask user before deploying to prod** - get explicit approval after dev is verified
+3. Deploy dev: `--only hosting:dev`
+4. Deploy prod: `--only hosting:prod`
+
 ### Common Deployment Errors to Avoid
+- **DO NOT** deploy directly to prod without testing on dev first
+- **DO NOT** use `--only hosting` without a target - always specify `:dev` or `:prod`
 - **DO NOT** use bash `cd` with Windows paths (backslashes are treated as escape characters)
 - **DO NOT** use plain `npx` in PowerShell without `-ExecutionPolicy Bypass` (blocked by default)
 - **ALWAYS** wrap the path in single quotes when using PowerShell

@@ -293,18 +293,6 @@
             background: #2db350;
         }
 
-        .mfa-badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            background: rgba(52,199,89,0.15);
-            color: #155724;
-            padding: 3px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
         .user-info {
             font-size: 13px;
             color: #86868b;
@@ -317,7 +305,7 @@
     <!-- Settings Panel -->
     <div class="container" id="settingsContainer">
         <a href="index.html" class="back-home" id="backLink">&larr; Back to Dashboard</a>
-        <h1>Dashboard Settings <span class="mfa-badge">MFA Enabled</span></h1>
+        <h1>Dashboard Settings</h1>
         <div class="user-info" id="userInfo"></div>
 
         <div class="toggle-row">
@@ -356,12 +344,6 @@
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = 'login.html?redirect=settings.html';
-                return;
-            }
-            // Check MFA level
-            const { data: aalData } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
-            if (aalData.currentLevel !== 'aal2') {
                 window.location.href = 'login.html?redirect=settings.html';
                 return;
             }
@@ -502,15 +484,20 @@
             syncBtn.textContent = 'Syncing...';
 
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/sync-cellartracker`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY,
                         'Content-Type': 'application/json'
                     }
                 });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    showStatus(`Sync failed: HTTP ${response.status} - ${text.substring(0, 100)}`, 'error');
+                    return;
+                }
 
                 const result = await response.json();
 
@@ -518,10 +505,10 @@
                     showStatus(`Sync complete: ${result.wines_upserted} wines, ${result.bottles_upserted} bottles`, 'success');
                     loadSyncStatus();
                 } else {
-                    showStatus('Sync failed: ' + (result.error || 'Unknown error'), 'error');
+                    showStatus('Sync failed: ' + (result.error || result.message || 'Unknown error'), 'error');
                 }
             } catch (err) {
-                showStatus('Sync failed: ' + err.message, 'error');
+                showStatus('Sync failed: ' + (err.message || 'Network error'), 'error');
             } finally {
                 syncBtn.disabled = false;
                 syncBtn.textContent = 'Sync from CellarTracker';
